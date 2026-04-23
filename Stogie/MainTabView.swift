@@ -166,20 +166,20 @@ private struct CigarTabIcon: View {
 
     var body: some View {
         ZStack {
+            // Cigar body — stays white so it always reads against the dark feed.
             Capsule()
-                .fill(isOn ? Color.orange : Color.white)
+                .fill(.white)
                 .frame(width: 30, height: 11)
+
+            // Tip: dormant ash when unlit, glowing red ember when lit.
             Circle()
-                .fill(isOn ? Color.yellow : Color.gray.opacity(0.85))
+                .fill(isOn ? Color.red : Color.gray.opacity(0.85))
                 .frame(width: 10, height: 10)
                 .offset(x: -15)
-            if isOn {
-                Circle()
-                    .fill(Color.red)
-                    .frame(width: 4, height: 4)
-                    .offset(x: -15)
-            }
+                .shadow(color: isOn ? .red : .clear, radius: 4)
+                .shadow(color: isOn ? .orange.opacity(0.85) : .clear, radius: 10)
+                .shadow(color: isOn ? .red.opacity(0.6) : .clear, radius: 16)
         }
-        .shadow(color: isOn ? .orange.opacity(0.6) : .clear, radius: 5)
+        .animation(.easeInOut(duration: 0.25), value: isOn)
     }
 }
