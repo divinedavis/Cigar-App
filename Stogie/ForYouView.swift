@@ -55,17 +55,17 @@ private struct PostCell: View {
 
             BottomDimGradient()
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
+                cigarChip
                 Text("@cigar_fan_\(post.authorID.uuidString.prefix(4).lowercased())")
                     .font(.headline).foregroundStyle(.white)
                 Text(post.caption)
                     .font(.subheadline).foregroundStyle(.white.opacity(0.95))
                     .lineLimit(3)
-                if let cigarID = post.cigarID,
-                   let cigar = CigarCatalog.all.first(where: { $0.id == cigarID }) {
-                    Label(cigar.displayName, systemImage: "flame.fill")
-                        .font(.caption).foregroundStyle(.orange)
-                }
+                Button("Follow") {}
+                    .buttonStyle(.borderedProminent)
+                    .tint(.orange)
+                    .controlSize(.small)
             }
             .padding(.horizontal, 22)
             .padding(.bottom, 110)
@@ -73,6 +73,18 @@ private struct PostCell: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
+    }
+
+    @ViewBuilder
+    private var cigarChip: some View {
+        if let cigarID = post.cigarID,
+           let cigar = CigarCatalog.all.first(where: { $0.id == cigarID }) {
+            Label(cigar.displayName, systemImage: "flame.fill")
+                .font(.caption).bold()
+                .padding(.horizontal, 8).padding(.vertical, 4)
+                .background(.orange.opacity(0.85), in: .capsule)
+                .foregroundStyle(.black)
+        }
     }
 }
 
