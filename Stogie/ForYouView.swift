@@ -5,20 +5,18 @@ struct ForYouView: View {
     @State private var items: [FeedItem] = []
 
     var body: some View {
-        GeometryReader { geo in
-            ScrollView(.vertical, showsIndicators: false) {
-                LazyVStack(spacing: 0) {
-                    ForEach(items) { item in
-                        feedCell(item)
-                            .frame(width: geo.size.width, height: geo.size.height)
-                    }
+        ScrollView(.vertical, showsIndicators: false) {
+            LazyVStack(spacing: 0) {
+                ForEach(items) { item in
+                    feedCell(item)
+                        .containerRelativeFrame([.horizontal, .vertical])
                 }
-                .scrollTargetLayout()
             }
-            .scrollTargetBehavior(.paging)
-            .ignoresSafeArea()
-            .background(.black)
+            .scrollTargetLayout()
         }
+        .scrollTargetBehavior(.paging)
+        .ignoresSafeArea()
+        .background(.black)
         .task { if items.isEmpty { items = buildInitialFeed() } }
     }
 
