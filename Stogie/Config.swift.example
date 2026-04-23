@@ -1,0 +1,9 @@
+// Copy this file to Config.swift and fill in real values.
+// Config.swift is gitignored so secrets never land in the repo.
+
+import Foundation
+
+enum Config {
+    static let supabaseURL = "https://YOUR-PROJECT-REF.supabase.co"
+    static let supabaseKey = "YOUR_SUPABASE_ANON_KEY"
+}
