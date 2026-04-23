@@ -66,6 +66,7 @@ struct PostMediaView: View {
         switch kind {
         case .video:
             LoopingVideoPlayer(url: url)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .ignoresSafeArea()
         case .photo:
             AsyncImage(url: url) { phase in
@@ -75,14 +76,19 @@ struct PostMediaView: View {
                         Color.black
                         ProgressView().tint(.white)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 case .success(let image):
                     image
                         .resizable()
                         .scaledToFill()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .clipped()
                 case .failure:
                     Color.brown.opacity(0.4)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 @unknown default:
                     Color.black
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .ignoresSafeArea()

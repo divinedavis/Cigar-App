@@ -35,22 +35,21 @@ struct ForYouView: View {
     }
 }
 
+// MARK: - Cells
+
 private struct PostCell: View {
     let post: Post
     @State private var reacted: Bool = false
     @State private var reactionCount: Int = 0
+    @State private var showingComments = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
             PostMediaView(url: post.mediaURL, kind: post.mediaKind)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
 
-            // Bottom gradient so caption stays legible over any media.
-            LinearGradient(
-                colors: [.clear, .black.opacity(0.55)],
-                startPoint: .center,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            BottomDimGradient()
 
             HStack(alignment: .bottom, spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -67,71 +66,136 @@ private struct PostCell: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                VStack(spacing: 22) {
-                    CigarReactionButton(count: reactionCount, isOn: reacted) {
+                ActionRail(
+                    reactionCount: reactionCount,
+                    isReacted: reacted,
+                    commentCount: post.commentCount,
+                    saveCount: post.saveCount,
+                    onReact: {
                         reacted.toggle()
                         reactionCount += reacted ? 1 : -1
-                    }
-                    Button(action: {}) {
-                        VStack(spacing: 2) {
-                            Image(systemName: "bubble.right.fill").font(.title2)
-                            Text("\(post.commentCount)").font(.caption2)
-                        }.foregroundStyle(.white)
-                    }
-                    Button(action: {}) {
-                        VStack(spacing: 2) {
-                            Image(systemName: "bookmark.fill").font(.title2)
-                            Text("\(post.saveCount)").font(.caption2)
-                        }.foregroundStyle(.white)
-                    }
-                    Button(action: {}) {
-                        Image(systemName: "arrowshape.turn.up.right.fill").font(.title2)
-                            .foregroundStyle(.white)
-                    }
-                }
+                    },
+                    onComment: { showingComments = true },
+                    onSave: {},
+                    onShare: {}
+                )
             }
             .padding(.horizontal, 18)
             .padding(.bottom, 110)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
         .onAppear {
             reacted = post.viewerHasReacted
             reactionCount = post.cigarReactionCount
+        }
+        .sheet(isPresented: $showingComments) {
+            CommentsView(title: post.caption, initialCount: post.commentCount)
         }
     }
 }
 
 private struct AdCell: View {
     let ad: AdCreative
+    @State private var reacted: Bool = false
+    @State private var reactionCount: Int = Int.random(in: 40...900)
+    @State private var showingComments = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
             PostMediaView(url: ad.mediaURL, kind: ad.mediaKind)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
 
-            LinearGradient(
-                colors: [.clear, .black.opacity(0.6)],
-                startPoint: .center,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            BottomDimGradient()
 
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Sponsored")
-                    .font(.caption).bold()
-                    .padding(.horizontal, 8).padding(.vertical, 4)
-                    .background(.yellow.opacity(0.85), in: .capsule)
-                    .foregroundStyle(.black)
-                Text(ad.businessName)
-                    .font(.headline).foregroundStyle(.white)
-                Text(ad.headline)
-                    .font(.subheadline).foregroundStyle(.white.opacity(0.95))
-                Button(ad.ctaLabel) {}
-                    .buttonStyle(.borderedProminent)
-                    .tint(.orange)
-                    .controlSize(.small)
+            HStack(alignment: .bottom, spacing: 12) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Sponsored")
+                        .font(.caption).bold()
+                        .padding(.horizontal, 8).padding(.vertical, 4)
+                        .background(.yellow.opacity(0.85), in: .capsule)
+                        .foregroundStyle(.black)
+                    Text(ad.businessName)
+                        .font(.headline).foregroundStyle(.white)
+                    Text(ad.headline)
+                        .font(.subheadline).foregroundStyle(.white.opacity(0.95))
+                        .lineLimit(3)
+                    Button(ad.ctaLabel) {}
+                        .buttonStyle(.borderedProminent)
+                        .tint(.orange)
+                        .controlSize(.small)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                ActionRail(
+                    reactionCount: reactionCount,
+                    isReacted: reacted,
+                    commentCount: 0,
+                    saveCount: 0,
+                    onReact: {
+                        reacted.toggle()
+                        reactionCount += reacted ? 1 : -1
+                    },
+                    onComment: { showingComments = true },
+                    onSave: {},
+                    onShare: {}
+                )
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 18)
             .padding(.bottom, 110)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
+        .sheet(isPresented: $showingComments) {
+            CommentsView(title: ad.headline, initialCount: 0)
+        }
+    }
+}
+
+// MARK: - Shared building blocks
+
+private struct BottomDimGradient: View {
+    var body: some View {
+        LinearGradient(
+            colors: [.clear, .black.opacity(0.6)],
+            startPoint: .center,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+    }
+}
+
+private struct ActionRail: View {
+    let reactionCount: Int
+    let isReacted: Bool
+    let commentCount: Int
+    let saveCount: Int
+    let onReact: () -> Void
+    let onComment: () -> Void
+    let onSave: () -> Void
+    let onShare: () -> Void
+
+    var body: some View {
+        VStack(spacing: 22) {
+            CigarReactionButton(count: reactionCount, isOn: isReacted, action: onReact)
+            Button(action: onComment) {
+                VStack(spacing: 2) {
+                    Image(systemName: "bubble.right.fill").font(.title2)
+                    Text("\(commentCount)").font(.caption2)
+                }.foregroundStyle(.white)
+            }
+            Button(action: onSave) {
+                VStack(spacing: 2) {
+                    Image(systemName: "bookmark.fill").font(.title2)
+                    Text("\(saveCount)").font(.caption2)
+                }.foregroundStyle(.white)
+            }
+            Button(action: onShare) {
+                Image(systemName: "arrowshape.turn.up.right.fill").font(.title2)
+                    .foregroundStyle(.white)
+            }
         }
     }
 }

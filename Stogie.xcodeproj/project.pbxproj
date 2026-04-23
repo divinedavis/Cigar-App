@@ -20,6 +20,7 @@
 		7B47F6DEA9B56B3F0DD85FD5 /* ForYouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEC7DA8B5DA81EE3D7E590D /* ForYouView.swift */; };
 		8A863D4991D15D7B974286A5 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEB682BBEE9F0102E216E573 /* SampleData.swift */; };
 		B15FA7E47C76BE49C5A2E80A /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CD841F72CB94B77B5200B9 /* Config.swift */; };
+		B19EBB466573BA5451F65DCF /* CommentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CF578D455119750B84D9748 /* CommentsView.swift */; };
 		B2217E7781118C0DD197CD99 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E974B0C8B45AA4D013A62919 /* AuthView.swift */; };
 		B2F1F29AD97814FDAF2E3DA8 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFCA20ACDDCCE86D0546FDB /* ProfileView.swift */; };
 		B43E2DC1B58958CC004CAF48 /* CreatePostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A9A028EBCF096FD2576F08 /* CreatePostView.swift */; };
@@ -30,6 +31,7 @@
 /* Begin PBXFileReference section */
 		084205CFDC63BA83071F9519 /* CigarReactionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CigarReactionButton.swift; sourceTree = "<group>"; };
 		140F5EF554E7B8447EEA33D3 /* Stogie.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Stogie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1CF578D455119750B84D9748 /* CommentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsView.swift; sourceTree = "<group>"; };
 		23CD841F72CB94B77B5200B9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		498EA075E42CF07DC3CFC4A4 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		544B10211FEC9D65AC9706AF /* CigarCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CigarCatalog.swift; sourceTree = "<group>"; };
@@ -76,6 +78,7 @@
 				E974B0C8B45AA4D013A62919 /* AuthView.swift */,
 				544B10211FEC9D65AC9706AF /* CigarCatalog.swift */,
 				084205CFDC63BA83071F9519 /* CigarReactionButton.swift */,
+				1CF578D455119750B84D9748 /* CommentsView.swift */,
 				23CD841F72CB94B77B5200B9 /* Config.swift */,
 				B5A9A028EBCF096FD2576F08 /* CreatePostView.swift */,
 				8EEC7DA8B5DA81EE3D7E590D /* ForYouView.swift */,
@@ -180,6 +183,7 @@
 				B2217E7781118C0DD197CD99 /* AuthView.swift in Sources */,
 				E1A399BF9C85B322726878F7 /* CigarCatalog.swift in Sources */,
 				127D488EC08157FC5B9DB09D /* CigarReactionButton.swift in Sources */,
+				B19EBB466573BA5451F65DCF /* CommentsView.swift in Sources */,
 				B15FA7E47C76BE49C5A2E80A /* Config.swift in Sources */,
 				B43E2DC1B58958CC004CAF48 /* CreatePostView.swift in Sources */,
 				7B47F6DEA9B56B3F0DD85FD5 /* ForYouView.swift in Sources */,
@@ -232,7 +236,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = CG89RY4W6R;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -340,7 +344,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = CG89RY4W6R;
 				ENABLE_NS_ASSERTIONS = NO;
