@@ -11,6 +11,7 @@ struct MainTabView: View {
     @State private var showingCreate = false
     @State private var showingComments = false
     @State private var showingProfile = false
+    @State private var showingSearch = false
 
     var body: some View {
         ZStack {
@@ -36,7 +37,8 @@ struct MainTabView: View {
                     isReacted: feed.currentIsReacted,
                     onCigar: { feed.toggleReactionOnCurrent() },
                     onComments: { showingComments = true },
-                    onPost: { showingCreate = true }
+                    onPost: { showingCreate = true },
+                    onSearch: { showingSearch = true }
                 )
                 .padding(.horizontal, 22)
                 .padding(.bottom, 14)
@@ -47,6 +49,9 @@ struct MainTabView: View {
         }
         .sheet(isPresented: $showingComments) {
             commentsSheet
+        }
+        .sheet(isPresented: $showingSearch) {
+            SearchView()
         }
         .fullScreenCover(isPresented: $showingProfile) {
             NavigationStack {
@@ -121,6 +126,7 @@ private struct FloatingTabBar: View {
     let onCigar: () -> Void
     let onComments: () -> Void
     let onPost: () -> Void
+    let onSearch: () -> Void
 
     var body: some View {
         HStack(spacing: 0) {
@@ -135,6 +141,11 @@ private struct FloatingTabBar: View {
             tabButton(action: onPost) {
                 Image(systemName: "plus.square.fill")
                     .font(.system(size: 22))
+                    .foregroundStyle(.white)
+            }
+            tabButton(action: onSearch) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(.white)
             }
         }
