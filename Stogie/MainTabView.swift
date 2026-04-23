@@ -9,7 +9,6 @@ struct MainTabView: View {
     @StateObject private var feed = FeedController()
 
     @State private var showingCreate = false
-    @State private var showingMessages = false
     @State private var showingComments = false
     @State private var showingProfile = false
 
@@ -37,7 +36,6 @@ struct MainTabView: View {
                     isReacted: feed.currentIsReacted,
                     onCigar: { feed.toggleReactionOnCurrent() },
                     onComments: { showingComments = true },
-                    onMessages: { showingMessages = true },
                     onPost: { showingCreate = true }
                 )
                 .padding(.horizontal, 22)
@@ -46,9 +44,6 @@ struct MainTabView: View {
         }
         .fullScreenCover(isPresented: $showingCreate) {
             CreatePostView()
-        }
-        .sheet(isPresented: $showingMessages) {
-            MessagesView()
         }
         .sheet(isPresented: $showingComments) {
             commentsSheet
@@ -125,7 +120,6 @@ private struct FloatingTabBar: View {
     let isReacted: Bool
     let onCigar: () -> Void
     let onComments: () -> Void
-    let onMessages: () -> Void
     let onPost: () -> Void
 
     var body: some View {
@@ -135,11 +129,6 @@ private struct FloatingTabBar: View {
             }
             tabButton(action: onComments) {
                 Image(systemName: "bubble.left.and.bubble.right.fill")
-                    .font(.system(size: 20))
-                    .foregroundStyle(.white)
-            }
-            tabButton(action: onMessages) {
-                Image(systemName: "envelope.fill")
                     .font(.system(size: 20))
                     .foregroundStyle(.white)
             }
