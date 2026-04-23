@@ -39,16 +39,11 @@ enum SamplePosts {
             "Cigar trip to the Dominican was unreal."
         ]
         return (0..<count).map { i in
-            // Roughly half videos, half photos — interleaved.
-            let isVideo = i % 2 == 0
-            let mediaURL: URL = isVideo
-                ? SampleMedia.videos[i % SampleMedia.videos.count]
-                : SampleMedia.photo(seed: "stogie-post-\(i)")
-            return Post(
+            Post(
                 id: UUID(),
                 authorID: UUID(),
-                mediaURL: mediaURL,
-                mediaKind: isVideo ? .video : .photo,
+                mediaURL: SampleMedia.photo(seed: "stogie-post-\(i)"),
+                mediaKind: .photo,
                 caption: captions[i % captions.count],
                 cigarID: CigarCatalog.all.randomElement()?.id,
                 storeID: nil,
