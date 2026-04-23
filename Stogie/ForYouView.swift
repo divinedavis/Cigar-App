@@ -55,22 +55,20 @@ private struct PostCell: View {
 
             BottomDimGradient()
 
-            HStack(alignment: .bottom, spacing: 0) {
-                VStack(alignment: .leading, spacing: 8) {
-                    cigarChip
-                    Text("@cigar_fan_\(post.authorID.uuidString.prefix(4).lowercased())")
-                        .font(.headline).foregroundStyle(.white)
-                        .lineLimit(1)
-                    Text(post.caption)
-                        .font(.subheadline).foregroundStyle(.white.opacity(0.95))
-                        .lineLimit(3)
-                    Button("Follow") {}
-                        .buttonStyle(.borderedProminent)
-                        .tint(.orange)
-                        .controlSize(.small)
-                }
-                Spacer(minLength: 0)
+            VStack(alignment: .leading, spacing: 8) {
+                cigarChip
+                Text("@cigar_fan_\(post.authorID.uuidString.prefix(4).lowercased())")
+                    .font(.headline).foregroundStyle(.white)
+                    .lineLimit(1)
+                Text(post.caption)
+                    .font(.subheadline).foregroundStyle(.white.opacity(0.95))
+                    .lineLimit(3)
+                Button("Follow") {}
+                    .buttonStyle(.borderedProminent)
+                    .tint(.orange)
+                    .controlSize(.small)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 22)
             .padding(.bottom, 110)
         }
@@ -104,26 +102,24 @@ private struct AdCell: View {
 
             BottomDimGradient()
 
-            HStack(alignment: .bottom, spacing: 0) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Sponsored")
-                        .font(.caption).bold()
-                        .padding(.horizontal, 8).padding(.vertical, 4)
-                        .background(.yellow.opacity(0.85), in: .capsule)
-                        .foregroundStyle(.black)
-                    Text(ad.businessName)
-                        .font(.headline).foregroundStyle(.white)
-                        .lineLimit(1)
-                    Text(ad.headline)
-                        .font(.subheadline).foregroundStyle(.white.opacity(0.95))
-                        .lineLimit(3)
-                    Button(ad.ctaLabel) {}
-                        .buttonStyle(.borderedProminent)
-                        .tint(.orange)
-                        .controlSize(.small)
-                }
-                Spacer(minLength: 0)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Sponsored")
+                    .font(.caption).bold()
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(.yellow.opacity(0.85), in: .capsule)
+                    .foregroundStyle(.black)
+                Text(ad.businessName)
+                    .font(.headline).foregroundStyle(.white)
+                    .lineLimit(1)
+                Text(ad.headline)
+                    .font(.subheadline).foregroundStyle(.white.opacity(0.95))
+                    .lineLimit(3)
+                Button(ad.ctaLabel) {}
+                    .buttonStyle(.borderedProminent)
+                    .tint(.orange)
+                    .controlSize(.small)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 22)
             .padding(.bottom, 110)
         }
