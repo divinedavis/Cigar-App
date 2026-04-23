@@ -18,6 +18,7 @@
 		5CE237ABD2049534E4BECBC3 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6327C62AD7BC21EFFB761F7E /* SplashView.swift */; };
 		6A19E578623719FD65BFC30E /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B63E7CF403DABDC47A7001 /* SupabaseManager.swift */; };
 		749EA5368F64D41028CBB829 /* StogieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93305DD736402125F30E4B66 /* StogieApp.swift */; };
+		77B2D06E53FF7B59F5110C0A /* FeedController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E6CED92C1E1AD83A399A5E /* FeedController.swift */; };
 		7B47F6DEA9B56B3F0DD85FD5 /* ForYouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEC7DA8B5DA81EE3D7E590D /* ForYouView.swift */; };
 		8A863D4991D15D7B974286A5 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEB682BBEE9F0102E216E573 /* SampleData.swift */; };
 		B15FA7E47C76BE49C5A2E80A /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CD841F72CB94B77B5200B9 /* Config.swift */; };
@@ -25,6 +26,7 @@
 		B2217E7781118C0DD197CD99 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E974B0C8B45AA4D013A62919 /* AuthView.swift */; };
 		B2F1F29AD97814FDAF2E3DA8 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFCA20ACDDCCE86D0546FDB /* ProfileView.swift */; };
 		B43E2DC1B58958CC004CAF48 /* CreatePostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A9A028EBCF096FD2576F08 /* CreatePostView.swift */; };
+		D2854BCD43195C5893B375C9 /* MessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F459BFF256FC53DE03E711A /* MessagesView.swift */; };
 		D58C6051A7B3BBE54D7CAEEA /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75AF7D6220EDB40C3F747564 /* LocationManager.swift */; };
 		E1A399BF9C85B322726878F7 /* CigarCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544B10211FEC9D65AC9706AF /* CigarCatalog.swift */; };
 /* End PBXBuildFile section */
@@ -35,6 +37,7 @@
 		1CF578D455119750B84D9748 /* CommentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsView.swift; sourceTree = "<group>"; };
 		23CD841F72CB94B77B5200B9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		498EA075E42CF07DC3CFC4A4 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		4F459BFF256FC53DE03E711A /* MessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesView.swift; sourceTree = "<group>"; };
 		544B10211FEC9D65AC9706AF /* CigarCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CigarCatalog.swift; sourceTree = "<group>"; };
 		6327C62AD7BC21EFFB761F7E /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		75AF7D6220EDB40C3F747564 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
@@ -42,6 +45,7 @@
 		8EEC7DA8B5DA81EE3D7E590D /* ForYouView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForYouView.swift; sourceTree = "<group>"; };
 		93305DD736402125F30E4B66 /* StogieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StogieApp.swift; sourceTree = "<group>"; };
 		B5A9A028EBCF096FD2576F08 /* CreatePostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePostView.swift; sourceTree = "<group>"; };
+		B6E6CED92C1E1AD83A399A5E /* FeedController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedController.swift; sourceTree = "<group>"; };
 		BEB682BBEE9F0102E216E573 /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		C7B63E7CF403DABDC47A7001 /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
 		D2926E602C4C9BFF158B94B4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -83,10 +87,12 @@
 				1CF578D455119750B84D9748 /* CommentsView.swift */,
 				23CD841F72CB94B77B5200B9 /* Config.swift */,
 				B5A9A028EBCF096FD2576F08 /* CreatePostView.swift */,
+				B6E6CED92C1E1AD83A399A5E /* FeedController.swift */,
 				8EEC7DA8B5DA81EE3D7E590D /* ForYouView.swift */,
 				75AF7D6220EDB40C3F747564 /* LocationManager.swift */,
 				7ED5BE2CA943F7D25E0C6881 /* MainTabView.swift */,
 				F314CD5CDCA2C10CFC6F4C07 /* MediaPlayerView.swift */,
+				4F459BFF256FC53DE03E711A /* MessagesView.swift */,
 				FE584AF25EA1B00F8F738E3B /* Models.swift */,
 				FCFCA20ACDDCCE86D0546FDB /* ProfileView.swift */,
 				BEB682BBEE9F0102E216E573 /* SampleData.swift */,
@@ -189,10 +195,12 @@
 				B19EBB466573BA5451F65DCF /* CommentsView.swift in Sources */,
 				B15FA7E47C76BE49C5A2E80A /* Config.swift in Sources */,
 				B43E2DC1B58958CC004CAF48 /* CreatePostView.swift in Sources */,
+				77B2D06E53FF7B59F5110C0A /* FeedController.swift in Sources */,
 				7B47F6DEA9B56B3F0DD85FD5 /* ForYouView.swift in Sources */,
 				D58C6051A7B3BBE54D7CAEEA /* LocationManager.swift in Sources */,
 				4A05FD2197D5119067BBE1FF /* MainTabView.swift in Sources */,
 				4F9333B7A4E5C8B29B67CB92 /* MediaPlayerView.swift in Sources */,
+				D2854BCD43195C5893B375C9 /* MessagesView.swift in Sources */,
 				15912FEF592C419B5822F44B /* Models.swift in Sources */,
 				B2F1F29AD97814FDAF2E3DA8 /* ProfileView.swift in Sources */,
 				8A863D4991D15D7B974286A5 /* SampleData.swift in Sources */,

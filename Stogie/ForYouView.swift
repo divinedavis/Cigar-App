@@ -2,22 +2,29 @@ import SwiftUI
 
 struct ForYouView: View {
     @EnvironmentObject var session: SessionStore
-    @State private var items: [FeedItem] = []
+    @EnvironmentObject var feed: FeedController
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 0) {
-                ForEach(items) { item in
+                ForEach(feed.items) { item in
                     feedCell(item)
                         .containerRelativeFrame([.horizontal, .vertical])
+                        .id(item.id)
                 }
             }
             .scrollTargetLayout()
         }
         .scrollTargetBehavior(.paging)
+        .scrollPosition(id: $feed.scrolledID)
         .ignoresSafeArea()
         .background(.black)
-        .task { if items.isEmpty { items = buildInitialFeed() } }
+        .task {
+            if feed.items.isEmpty {
+                feed.items = buildInitialFeed()
+                feed.scrolledID = feed.items.first?.id
+            }
+        }
     }
 
     @ViewBuilder
@@ -39,117 +46,69 @@ struct ForYouView: View {
 
 private struct PostCell: View {
     let post: Post
-    @State private var reacted: Bool = false
-    @State private var reactionCount: Int = 0
-    @State private var showingComments = false
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .bottomLeading) {
             PostMediaView(url: post.mediaURL, kind: post.mediaKind)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .clipped()
 
             BottomDimGradient()
 
-            HStack(alignment: .bottom, spacing: 12) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("@cigar_fan_\(post.authorID.uuidString.prefix(4).lowercased())")
-                        .font(.headline).foregroundStyle(.white)
-                    Text(post.caption)
-                        .font(.subheadline).foregroundStyle(.white.opacity(0.95))
-                        .lineLimit(3)
-                    if let cigarID = post.cigarID,
-                       let cigar = CigarCatalog.all.first(where: { $0.id == cigarID }) {
-                        Label(cigar.displayName, systemImage: "flame.fill")
-                            .font(.caption).foregroundStyle(.orange)
-                    }
+            VStack(alignment: .leading, spacing: 6) {
+                Text("@cigar_fan_\(post.authorID.uuidString.prefix(4).lowercased())")
+                    .font(.headline).foregroundStyle(.white)
+                Text(post.caption)
+                    .font(.subheadline).foregroundStyle(.white.opacity(0.95))
+                    .lineLimit(3)
+                if let cigarID = post.cigarID,
+                   let cigar = CigarCatalog.all.first(where: { $0.id == cigarID }) {
+                    Label(cigar.displayName, systemImage: "flame.fill")
+                        .font(.caption).foregroundStyle(.orange)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                ActionRail(
-                    reactionCount: reactionCount,
-                    isReacted: reacted,
-                    commentCount: post.commentCount,
-                    saveCount: post.saveCount,
-                    onReact: {
-                        reacted.toggle()
-                        reactionCount += reacted ? 1 : -1
-                    },
-                    onComment: { showingComments = true },
-                    onSave: {},
-                    onShare: {}
-                )
             }
-            .padding(.horizontal, 18)
+            .padding(.horizontal, 22)
             .padding(.bottom, 110)
+            .padding(.trailing, 22)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
-        .onAppear {
-            reacted = post.viewerHasReacted
-            reactionCount = post.cigarReactionCount
-        }
-        .sheet(isPresented: $showingComments) {
-            CommentsView(title: post.caption, initialCount: post.commentCount)
-        }
     }
 }
 
 private struct AdCell: View {
     let ad: AdCreative
-    @State private var reacted: Bool = false
-    @State private var reactionCount: Int = Int.random(in: 40...900)
-    @State private var showingComments = false
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .bottomLeading) {
             PostMediaView(url: ad.mediaURL, kind: ad.mediaKind)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .clipped()
 
             BottomDimGradient()
 
-            HStack(alignment: .bottom, spacing: 12) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Sponsored")
-                        .font(.caption).bold()
-                        .padding(.horizontal, 8).padding(.vertical, 4)
-                        .background(.yellow.opacity(0.85), in: .capsule)
-                        .foregroundStyle(.black)
-                    Text(ad.businessName)
-                        .font(.headline).foregroundStyle(.white)
-                    Text(ad.headline)
-                        .font(.subheadline).foregroundStyle(.white.opacity(0.95))
-                        .lineLimit(3)
-                    Button(ad.ctaLabel) {}
-                        .buttonStyle(.borderedProminent)
-                        .tint(.orange)
-                        .controlSize(.small)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                ActionRail(
-                    reactionCount: reactionCount,
-                    isReacted: reacted,
-                    commentCount: 0,
-                    saveCount: 0,
-                    onReact: {
-                        reacted.toggle()
-                        reactionCount += reacted ? 1 : -1
-                    },
-                    onComment: { showingComments = true },
-                    onSave: {},
-                    onShare: {}
-                )
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Sponsored")
+                    .font(.caption).bold()
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(.yellow.opacity(0.85), in: .capsule)
+                    .foregroundStyle(.black)
+                Text(ad.businessName)
+                    .font(.headline).foregroundStyle(.white)
+                Text(ad.headline)
+                    .font(.subheadline).foregroundStyle(.white.opacity(0.95))
+                    .lineLimit(3)
+                Button(ad.ctaLabel) {}
+                    .buttonStyle(.borderedProminent)
+                    .tint(.orange)
+                    .controlSize(.small)
             }
-            .padding(.horizontal, 18)
+            .padding(.horizontal, 22)
             .padding(.bottom, 110)
+            .padding(.trailing, 22)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
-        .sheet(isPresented: $showingComments) {
-            CommentsView(title: ad.headline, initialCount: 0)
-        }
     }
 }
 
@@ -158,44 +117,11 @@ private struct AdCell: View {
 private struct BottomDimGradient: View {
     var body: some View {
         LinearGradient(
-            colors: [.clear, .black.opacity(0.6)],
+            colors: [.clear, .black.opacity(0.65)],
             startPoint: .center,
             endPoint: .bottom
         )
         .ignoresSafeArea()
         .allowsHitTesting(false)
-    }
-}
-
-private struct ActionRail: View {
-    let reactionCount: Int
-    let isReacted: Bool
-    let commentCount: Int
-    let saveCount: Int
-    let onReact: () -> Void
-    let onComment: () -> Void
-    let onSave: () -> Void
-    let onShare: () -> Void
-
-    var body: some View {
-        VStack(spacing: 22) {
-            CigarReactionButton(count: reactionCount, isOn: isReacted, action: onReact)
-            Button(action: onComment) {
-                VStack(spacing: 2) {
-                    Image(systemName: "bubble.right.fill").font(.title2)
-                    Text("\(commentCount)").font(.caption2)
-                }.foregroundStyle(.white)
-            }
-            Button(action: onSave) {
-                VStack(spacing: 2) {
-                    Image(systemName: "bookmark.fill").font(.title2)
-                    Text("\(saveCount)").font(.caption2)
-                }.foregroundStyle(.white)
-            }
-            Button(action: onShare) {
-                Image(systemName: "arrowshape.turn.up.right.fill").font(.title2)
-                    .foregroundStyle(.white)
-            }
-        }
     }
 }
