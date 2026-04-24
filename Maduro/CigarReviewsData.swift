@@ -27,6 +27,57 @@ struct CigarRatingBreakdown {
     let flavor: Double            // 0.0 - 5.0
 }
 
+struct CigarSpecs {
+    let shapes: [String]
+    let wrapper: String
+    let origin: String
+
+    /// Accurate specs for well-known lines keyed by "<brand>|<line>" lowercased.
+    /// Everything outside this table falls back to deterministic mock values.
+    static let overrides: [String: CigarSpecs] = [
+        "arturo fuente|don carlos": CigarSpecs(
+            shapes: ["Belicoso", "Corona", "Robusto", "Presidente", "Double Robusto"],
+            wrapper: "Cameroon",
+            origin: "Dominican Republic"
+        ),
+        "arturo fuente|opusx": CigarSpecs(
+            shapes: ["Robusto", "Toro", "Double Corona", "Perfecxion No. 2", "XXX"],
+            wrapper: "Dominican Rosado",
+            origin: "Dominican Republic"
+        ),
+        "arturo fuente|hemingway": CigarSpecs(
+            shapes: ["Short Story", "Signature", "Classic", "Masterpiece"],
+            wrapper: "Cameroon",
+            origin: "Dominican Republic"
+        ),
+        "ashton|vsg": CigarSpecs(
+            shapes: ["Robusto", "Torpedo", "Churchill", "Sorcerer"],
+            wrapper: "Ecuadorian Sun Grown",
+            origin: "Dominican Republic"
+        ),
+        "ashton|classic": CigarSpecs(
+            shapes: ["Corona", "Robusto", "Churchill", "Magnum"],
+            wrapper: "Connecticut Shade",
+            origin: "Dominican Republic"
+        ),
+        "cohiba|behike": CigarSpecs(
+            shapes: ["BHK 52", "BHK 54", "BHK 56"],
+            wrapper: "Cuban Natural",
+            origin: "Cuba"
+        ),
+        "padron|1964 anniversary": CigarSpecs(
+            shapes: ["Exclusivo", "Imperial", "Diplomatico", "Superior", "Torpedo"],
+            wrapper: "Nicaraguan",
+            origin: "Nicaragua"
+        ),
+        "padron|1926 serie": CigarSpecs(
+            shapes: ["No. 1", "No. 2", "No. 9", "No. 35"],
+            wrapper: "Nicaraguan",
+            origin: "Nicaragua"
+        ),
+    ]
+}
+
 extension Cigar {
     /// Stable seed in [0, 1000) derived from the Cigar's UUID.
     private var seed: Int {
@@ -40,6 +91,31 @@ extension Cigar {
 
     var mockReviewCount: Int {
         18 + (seed % 480)
+    }
+
+    /// Physical specs shown on the detail page. Uses accurate data for
+    /// well-known lines and falls back to deterministic mock values
+    /// seeded by the cigar's UUID for everything else.
+    var specs: CigarSpecs {
+        let key = "\(brand.lowercased())|\(line.lowercased())"
+        if let override = CigarSpecs.overrides[key] { return override }
+
+        let shapePool: [[String]] = [
+            ["Robusto", "Toro", "Churchill"],
+            ["Corona", "Robusto", "Toro", "Double Corona"],
+            ["Belicoso", "Robusto", "Toro"],
+            ["Robusto", "Toro", "Gordo"],
+            ["Corona Gorda", "Toro", "Churchill", "Robusto"],
+        ]
+        let wrappers = ["Habano", "Connecticut", "Maduro", "Cameroon",
+                        "Sumatra", "San Andrés", "Corojo"]
+        let origins  = ["Dominican Republic", "Nicaragua", "Honduras", "Cuba", "Ecuador"]
+
+        return CigarSpecs(
+            shapes: shapePool[seed % shapePool.count],
+            wrapper: wrappers[seed % wrappers.count],
+            origin: origins[seed % origins.count]
+        )
     }
 
     var ratingBreakdown: CigarRatingBreakdown {

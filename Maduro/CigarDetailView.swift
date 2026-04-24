@@ -46,6 +46,8 @@ struct CigarDetailView: View {
                     cigarTitle
                     statsRow
                     Divider().background(.white.opacity(0.15))
+                    specsSection
+                    Divider().background(.white.opacity(0.15))
                     reviewsHeader
                     searchBar
                     reviewsList
@@ -101,6 +103,30 @@ struct CigarDetailView: View {
     private var topPercent: Int {
         let pct = Int((5.0 - breakdown.overall) * 12)
         return max(2, min(pct, 25))
+    }
+
+    // MARK: Specs
+
+    private var specsSection: some View {
+        let specs = cigar.specs
+        return VStack(alignment: .leading, spacing: 18) {
+            specRow(label: "Shape", value: specs.shapes.joined(separator: ", "))
+            specRow(label: "Wrapper", value: specs.wrapper)
+            specRow(label: "Origin", value: specs.origin)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func specRow(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white)
+            Text(value)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.75))
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     // MARK: Stats
