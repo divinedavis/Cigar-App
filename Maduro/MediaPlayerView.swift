@@ -63,35 +63,30 @@ struct PostMediaView: View {
     let kind: Post.MediaKind
 
     var body: some View {
-        switch kind {
-        case .video:
-            LoopingVideoPlayer(url: url)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .ignoresSafeArea()
-        case .photo:
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .empty:
-                    ZStack {
+        GeometryReader { geo in
+            switch kind {
+            case .video:
+                LoopingVideoPlayer(url: url)
+                    .frame(width: geo.size.width, height: geo.size.height)
+            case .photo:
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ZStack {
+                            Color.black
+                            ProgressView().tint(.white)
+                        }
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                    case .failure:
+                        Color.brown.opacity(0.4)
+                    @unknown default:
                         Color.black
-                        ProgressView().tint(.white)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .clipped()
-                case .failure:
-                    Color.brown.opacity(0.4)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                @unknown default:
-                    Color.black
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
+                .frame(width: geo.size.width, height: geo.size.height)
+                .clipped()
             }
-            .ignoresSafeArea()
         }
     }
 }
