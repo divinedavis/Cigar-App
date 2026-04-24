@@ -14,6 +14,9 @@ final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate,
 
     private var onSuccess: ((Result) -> Void)?
     private var onFailure: ((Error) -> Void)?
+    // `ASAuthorizationController` must outlive `start()` or Apple's callback
+    // fires into a deallocated object and surfaces as error 1000.
+    private var controller: ASAuthorizationController?
 
     func start(onSuccess: @escaping (Result) -> Void,
                onFailure: @escaping (Error) -> Void) {
@@ -26,11 +29,19 @@ final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate,
         let controller = ASAuthorizationController(authorizationRequests: [request])
         controller.delegate = self
         controller.presentationContextProvider = self
+        self.controller = controller
         controller.performRequests()
+    }
+
+    private func finish() {
+        controller = nil
+        onSuccess = nil
+        onFailure = nil
     }
 
     func authorizationController(controller: ASAuthorizationController,
                                  didCompleteWithAuthorization authorization: ASAuthorization) {
+        defer { finish() }
         guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
             onFailure?(NSError(domain: "AppleSignIn", code: -1))
             return
@@ -47,6 +58,7 @@ final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate,
 
     func authorizationController(controller: ASAuthorizationController,
                                  didCompleteWithError error: Error) {
+        defer { finish() }
         onFailure?(error)
     }
 
