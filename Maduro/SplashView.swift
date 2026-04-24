@@ -41,12 +41,20 @@ struct SplashView: View {
             .ignoresSafeArea()
             .allowsHitTesting(false)
 
-            // Title + tagline — sits roughly in the upper third.
-            VStack(spacing: 22) {
-                Spacer().frame(height: 130)
+            // Logo + tagline — sits roughly in the upper third.
+            VStack(spacing: 18) {
+                Spacer().frame(height: 90)
 
-                Text("S T O G I E")
-                    .font(.system(size: 38, weight: .light, design: .default))
+                Image("MaduroLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 200, height: 200)
+                    .shadow(color: .black.opacity(0.5), radius: 14, y: 4)
+                    .opacity(titleAppeared ? 1 : 0)
+                    .scaleEffect(titleAppeared ? 1 : 0.92)
+
+                Text("M A D U R O")
+                    .font(.system(size: 32, weight: .light, design: .default))
                     .tracking(10)
                     .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.6), radius: 8, y: 2)
