@@ -45,7 +45,7 @@ struct ContinueWithRow: View {
 /// password), and the button label.
 struct EmailAuthView: View {
     @Binding var path: [AuthRoute]
-    @State private var isCreating: Bool = true
+    @State private var isCreating: Bool = false
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
@@ -91,7 +91,7 @@ struct EmailAuthView: View {
                 .foregroundStyle(.white.opacity(0.6))
                 .contentTransition(.opacity)
 
-            Text(isCreating ? "Create your\nMaduro account." : "Sign in to\nyour humidor.")
+            Text(isCreating ? "Create your\nMaduro account." : "Sign in to\nMaduro.")
                 .font(.system(size: 42, weight: .heavy))
                 .foregroundStyle(.white)
                 .lineSpacing(2)
