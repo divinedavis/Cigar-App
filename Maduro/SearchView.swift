@@ -1,19 +1,31 @@
 import SwiftUI
 
-/// Browse / search the cigar catalog. Tap a row to open the cigar's
-/// review detail page.
+/// Airbnb-style discovery feed: horizontal carousels for popular cigars
+/// and nearby lounges when the query is empty, collapsing into a
+/// vertical filter list once the user starts typing.
 struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var query: String = ""
-    @State private var selected: Cigar?
+    @State private var selectedCigar: Cigar?
 
-    private var filtered: [Cigar] {
-        let q = query.trimmingCharacters(in: .whitespaces).lowercased()
-        if q.isEmpty { return CigarCatalog.all }
+    private var trimmedQuery: String {
+        query.trimmingCharacters(in: .whitespaces).lowercased()
+    }
+
+    private var popularCigars: [Cigar] {
+        // Top 10 by mockRating so "popular" is deterministic and non-empty.
+        CigarCatalog.all
+            .sorted { $0.mockRating > $1.mockRating }
+            .prefix(10)
+            .map { $0 }
+    }
+
+    private var filteredCigars: [Cigar] {
+        guard !trimmedQuery.isEmpty else { return [] }
         return CigarCatalog.all.filter { c in
-            c.brand.lowercased().contains(q)
-                || c.line.lowercased().contains(q)
-                || (c.vitola?.lowercased().contains(q) ?? false)
+            c.brand.lowercased().contains(trimmedQuery)
+                || c.line.lowercased().contains(trimmedQuery)
+                || (c.vitola?.lowercased().contains(trimmedQuery) ?? false)
         }
     }
 
@@ -26,17 +38,10 @@ struct SearchView: View {
                 )
                 .ignoresSafeArea()
 
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(filtered) { cigar in
-                            Button { selected = cigar } label: {
-                                CigarRow(cigar: cigar)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
+                if trimmedQuery.isEmpty {
+                    discoveryContent
+                } else {
+                    resultsList
                 }
             }
             .searchable(text: $query, prompt: "Search cigars by brand, line, or vitola")
@@ -51,13 +56,196 @@ struct SearchView: View {
             .toolbarBackground(.black.opacity(0.4), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
-            .navigationDestination(item: $selected) { cigar in
+            .navigationDestination(item: $selectedCigar) { cigar in
                 CigarDetailView(cigar: cigar)
             }
         }
         .preferredColorScheme(.dark)
     }
+
+    // MARK: Discovery
+
+    private var discoveryContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 32) {
+                section(title: "Find popular cigars") {
+                    horizontalRow(items: popularCigars) { cigar in
+                        Button { selectedCigar = cigar } label: {
+                            CigarPosterCard(cigar: cigar)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+
+                section(title: "Cigar lounges near you") {
+                    horizontalRow(items: LoungeCatalog.nearby) { lounge in
+                        LoungePosterCard(lounge: lounge)
+                    }
+                }
+
+                Spacer(minLength: 40)
+            }
+            .padding(.vertical, 12)
+        }
+    }
+
+    @ViewBuilder
+    private func section<Content: View>(title: String,
+                                        @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 4) {
+                Text(title)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(.white)
+                Image(systemName: "chevron.right")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+            .padding(.horizontal, 20)
+
+            content()
+        }
+    }
+
+    @ViewBuilder
+    private func horizontalRow<Item: Identifiable, Card: View>(
+        items: [Item],
+        @ViewBuilder card: @escaping (Item) -> Card
+    ) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 14) {
+                ForEach(items) { item in
+                    card(item)
+                }
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+
+    // MARK: Filtered results
+
+    private var resultsList: some View {
+        ScrollView {
+            LazyVStack(spacing: 12) {
+                ForEach(filteredCigars) { cigar in
+                    Button { selectedCigar = cigar } label: {
+                        CigarRow(cigar: cigar)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        }
+    }
 }
+
+// MARK: - Cards
+
+private struct CigarPosterCard: View {
+    let cigar: Cigar
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            PosterImage(seed: cigar.id.uuidString, topic: "cigar")
+                .frame(width: 220, height: 260)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(cigar.brand) · \(cigar.line)")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+
+                HStack(spacing: 4) {
+                    Image(systemName: "star.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                    Text(String(format: "%.1f", cigar.mockRating))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white)
+                    Text("· \(cigar.mockReviewCount) reviews")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.65))
+                }
+            }
+        }
+        .frame(width: 220, alignment: .leading)
+    }
+}
+
+private struct LoungePosterCard: View {
+    let lounge: Lounge
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            PosterImage(seed: lounge.id.uuidString, topic: "lounge")
+                .frame(width: 220, height: 260)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(lounge.name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+
+                HStack(spacing: 4) {
+                    Image(systemName: "star.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                    Text(String(format: "%.1f", lounge.rating))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white)
+                    Text("· \(lounge.neighborhood)")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.65))
+                        .lineLimit(1)
+                }
+            }
+        }
+        .frame(width: 220, alignment: .leading)
+    }
+}
+
+/// Dummy image for prototype cards. Loads a deterministic random photo
+/// from picsum.photos seeded by the item ID, with a warm gradient
+/// fallback while it loads or if the network is unavailable.
+private struct PosterImage: View {
+    let seed: String
+    let topic: String
+
+    private var url: URL? {
+        URL(string: "https://picsum.photos/seed/\(seed)/640/760")
+    }
+
+    var body: some View {
+        AsyncImage(url: url) { phase in
+            switch phase {
+            case .success(let image):
+                image.resizable().scaledToFill()
+            default:
+                fallbackGradient
+                    .overlay(
+                        Image(systemName: topic == "lounge" ? "sparkles" : "flame.fill")
+                            .font(.system(size: 44, weight: .light))
+                            .foregroundStyle(.white.opacity(0.75))
+                    )
+            }
+        }
+    }
+
+    private var fallbackGradient: some View {
+        LinearGradient(
+            colors: [
+                Color(red: 0.32, green: 0.18, blue: 0.08),
+                Color(red: 0.14, green: 0.08, blue: 0.04),
+            ],
+            startPoint: .topLeading, endPoint: .bottomTrailing
+        )
+    }
+}
+
+// MARK: - Fallback row used when the user is actively searching.
 
 private struct CigarRow: View {
     let cigar: Cigar
