@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="images/banner.svg" alt="Maduro — a social club for cigar enthusiasts" width="100%"/>
+  <img src="images/banner.png" alt="Maduro — a social club for cigar enthusiasts" width="100%"/>
+</p>
+
+<p align="center">
+  <img src="images/logo.png" alt="Maduro logo" width="120"/>
 </p>
 
 # Maduro

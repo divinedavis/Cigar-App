@@ -103,9 +103,85 @@ def build_splash_logo(path: Path) -> None:
     print(f"wrote {path}")
 
 
+def build_readme_logo(path: Path) -> None:
+    """400x400 rounded-square logo for the README."""
+    size = 400
+    img = vertical_gradient(size, size)
+    img = add_sheen(img)
+    canvas = img.convert("RGBA")
+    # Apply a rounded-corner mask since GitHub renders this on a white/dark page.
+    mask = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([(0, 0), (size, size)],
+                                           radius=int(size * 0.22), fill=255)
+    draw_m(canvas, color=(255, 255, 255, 255), scale=0.92)
+    out = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    out.paste(canvas, (0, 0), mask)
+    out.save(path, "PNG", optimize=True)
+    print(f"wrote {path}")
+
+
+def build_readme_banner(path: Path) -> None:
+    """1600x480 hero banner: green gradient + M monogram + 'Maduro' wordmark + tagline."""
+    w, h = 1600, 480
+    img = Image.new("RGBA", (w, h))
+    # Horizontal gradient for a wide banner looks better than vertical.
+    grad = Image.new("RGB", (w, h))
+    px = grad.load()
+    for x in range(w):
+        t = x / (w - 1)
+        if t < 0.5:
+            k = t * 2
+            r = int(GRAD_TOP[0] + (GRAD_MID[0] - GRAD_TOP[0]) * k)
+            g = int(GRAD_TOP[1] + (GRAD_MID[1] - GRAD_TOP[1]) * k)
+            b = int(GRAD_TOP[2] + (GRAD_MID[2] - GRAD_TOP[2]) * k)
+        else:
+            k = (t - 0.5) * 2
+            r = int(GRAD_MID[0] + (GRAD_BOT[0] - GRAD_MID[0]) * k)
+            g = int(GRAD_MID[1] + (GRAD_BOT[1] - GRAD_MID[1]) * k)
+            b = int(GRAD_MID[2] + (GRAD_BOT[2] - GRAD_MID[2]) * k)
+        for y in range(h):
+            px[x, y] = (r, g, b)
+    # Apply sheen only once on the bigger canvas so the highlight feels right.
+    grad_sheen = add_sheen(grad)
+    img.paste(grad_sheen, (0, 0))
+
+    draw = ImageDraw.Draw(img)
+
+    # M monogram on the left, vertically centered.
+    m_size = int(h * 0.85)
+    m_canvas = Image.new("RGBA", (m_size, m_size), (0, 0, 0, 0))
+    draw_m(m_canvas, color=(255, 255, 255, 255), scale=1.05)
+    img.paste(m_canvas, (int(h * 0.22), (h - m_size) // 2), m_canvas)
+
+    # Wordmark + tagline to the right of the mark.
+    word_font = load_bold_font(170)
+    try:
+        tagline_font = ImageFont.truetype(
+            "/System/Library/Fonts/Supplemental/Arial.ttf", 34)
+    except OSError:
+        tagline_font = load_bold_font(34)
+
+    text_left = int(h * 0.22) + m_size + 48
+    # anchor="lm" places the text's left edge at x and its vertical center at y.
+    word_center_y = h // 2 - 42
+    tagline_center_y = h // 2 + 78
+    draw.text((text_left, word_center_y), "Maduro",
+              font=word_font, fill=(255, 255, 255, 255), anchor="lm")
+
+    tag = "A social club for cigar enthusiasts."
+    draw.text((text_left + 6, tagline_center_y), tag,
+              font=tagline_font, fill=(255, 255, 255, 230), anchor="lm")
+
+    img.convert("RGB").save(path, "PNG", optimize=True)
+    print(f"wrote {path}")
+
+
 def main() -> None:
     build_app_icon(ROOT / "Maduro" / "Assets.xcassets" / "AppIcon.appiconset" / "AppIcon-1024.png")
     build_splash_logo(ROOT / "Maduro" / "Assets.xcassets" / "MaduroLogo.imageset" / "MaduroLogo.png")
+    (ROOT / "images").mkdir(exist_ok=True)
+    build_readme_logo(ROOT / "images" / "logo.png")
+    build_readme_banner(ROOT / "images" / "banner.png")
 
 
 if __name__ == "__main__":
