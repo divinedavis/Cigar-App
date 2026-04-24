@@ -7,6 +7,7 @@ struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var query: String = ""
     @State private var selectedCigar: Cigar?
+    @State private var selectedLounge: Lounge?
 
     private var trimmedQuery: String {
         query.trimmingCharacters(in: .whitespaces).lowercased()
@@ -59,6 +60,9 @@ struct SearchView: View {
             .navigationDestination(item: $selectedCigar) { cigar in
                 CigarDetailView(cigar: cigar)
             }
+            .navigationDestination(item: $selectedLounge) { lounge in
+                LoungeDetailView(lounge: lounge)
+            }
         }
         .preferredColorScheme(.dark)
     }
@@ -79,7 +83,10 @@ struct SearchView: View {
 
                 section(title: "Cigar lounges near you") {
                     horizontalRow(items: LoungeCatalog.nearby) { lounge in
-                        LoungePosterCard(lounge: lounge)
+                        Button { selectedLounge = lounge } label: {
+                            LoungePosterCard(lounge: lounge)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
 

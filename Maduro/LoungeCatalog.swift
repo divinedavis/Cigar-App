@@ -10,6 +10,19 @@ struct Lounge: Identifiable, Hashable {
     let neighborhood: String
     let rating: Double
     let reviewCount: Int
+
+    /// Up to 30 deterministic stock photos keyed by the lounge id.
+    var galleryURLs: [URL] {
+        (0..<25).compactMap { offset in
+            URL(string: "https://picsum.photos/seed/\(id.uuidString.prefix(8))-\(offset)/1200/800")
+        }
+    }
+
+    /// Query string handed to Apple Maps when the location pill is tapped.
+    var mapsQuery: String { "\(name), \(neighborhood)" }
+
+    /// Is this a guest-favorite lounge? (Top slice of the list for now.)
+    var isGuestFavorite: Bool { rating >= 4.6 }
 }
 
 enum LoungeCatalog {
