@@ -44,6 +44,7 @@ struct ContinueWithRow: View {
 /// animates the title, subtitle, the extra fields (Full name, Confirm
 /// password), and the button label.
 struct EmailAuthView: View {
+    @EnvironmentObject var session: SessionStore
     @Binding var path: [AuthRoute]
     @State private var isCreating: Bool = false
     @State private var name: String = ""
@@ -218,8 +219,13 @@ struct EmailAuthView: View {
                                  identifier: emailTrim,
                                  displayName: trimmedName))
         } else {
-            // Stub sign-in path — still goes through age gate until we wire
-            // Supabase auth + profile fetch for returning users.
+            // Returning user: if we've seen this email before, sign in
+            // directly. Otherwise fall back to the age gate so they can
+            // finish signing up.
+            if let existing = session.lookup(method: "email", identifier: emailTrim) {
+                session.signIn(as: existing)
+                return
+            }
             let prefill = emailTrim.components(separatedBy: "@").first ?? "user"
             path.append(.ageGate(method: "email",
                                  identifier: emailTrim,
@@ -370,6 +376,7 @@ struct AgeGateView: View {
             isVerified: false
         )
         // TODO: replace with real Supabase signUp/signIn keyed by `method` + `identifier`.
+        session.register(method: method, identifier: identifier, user: user)
         session.signIn(as: user)
     }
 }

@@ -112,6 +112,13 @@ struct SplashView: View {
     private func startAppleSignIn() {
         appleCoordinator.coordinator.start(
             onSuccess: { result in
+                // Returning Apple users: look up the stable userID and sign
+                // them straight in instead of pushing them through the
+                // sign-up age gate again.
+                if let existing = session.lookup(method: "apple", identifier: result.userID) {
+                    session.signIn(as: existing)
+                    return
+                }
                 path.append(.ageGate(method: "apple",
                                      identifier: result.userID,
                                      displayName: result.displayName))
