@@ -1,3 +1,4 @@
+import AuthenticationServices
 import SwiftUI
 
 /// Splash entry shown while the user is signed out. Animated cigar-
@@ -7,8 +8,9 @@ import SwiftUI
 struct SplashView: View {
     @EnvironmentObject var session: SessionStore
     @State private var path: [AuthRoute] = []
-    @State private var showAppleSoon = false
     @State private var titleAppeared = false
+    @State private var appleError: String?
+    @StateObject private var appleCoordinator = AppleSignInCoordinatorBox()
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -51,16 +53,16 @@ struct SplashView: View {
                         .opacity(titleAppeared ? 1 : 0)
                         .scaleEffect(titleAppeared ? 1 : 0.92)
 
-                    Text("M A D U R O")
-                        .font(.system(size: 32, weight: .light, design: .default))
-                        .tracking(10)
+                    Text("Maduro")
+                        .font(.system(size: 38, weight: .heavy, design: .rounded))
+                        .tracking(-0.5)
                         .foregroundStyle(.white)
                         .shadow(color: .black.opacity(0.6), radius: 8, y: 2)
                         .opacity(titleAppeared ? 1 : 0)
                         .offset(y: titleAppeared ? 0 : 10)
 
                     Text("A community for cigar lovers —\nshare, savor, discover.")
-                        .font(.subheadline)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.white.opacity(0.75))
                         .lineSpacing(4)
@@ -76,7 +78,7 @@ struct SplashView: View {
                     Button { path.append(.email) } label: {
                         ContinueWithRow(icon: "envelope", title: "Continue with email")
                     }
-                    Button { showAppleSoon = true } label: {
+                    Button { startAppleSignIn() } label: {
                         ContinueWithRow(icon: "applelogo", title: "Continue with Apple")
                     }
                 }
@@ -91,8 +93,12 @@ struct SplashView: View {
                     AgeGateView(method: method, identifier: identifier, displayName: displayName)
                 }
             }
-            .alert("Apple sign-in coming soon", isPresented: $showAppleSoon) {
-                Button("OK") {}
+            .alert("Sign in with Apple failed",
+                   isPresented: Binding(get: { appleError != nil },
+                                        set: { if !$0 { appleError = nil } })) {
+                Button("OK") { appleError = nil }
+            } message: {
+                Text(appleError ?? "")
             }
         }
         .preferredColorScheme(.dark)
@@ -102,6 +108,31 @@ struct SplashView: View {
             }
         }
     }
+
+    private func startAppleSignIn() {
+        appleCoordinator.coordinator.start(
+            onSuccess: { result in
+                path.append(.ageGate(method: "apple",
+                                     identifier: result.userID,
+                                     displayName: result.displayName))
+            },
+            onFailure: { error in
+                let ns = error as NSError
+                // User cancelled — don't surface a modal.
+                if ns.domain == ASAuthorizationErrorDomain,
+                   ns.code == ASAuthorizationError.canceled.rawValue {
+                    return
+                }
+                appleError = ns.localizedDescription
+            }
+        )
+    }
+}
+
+/// Keeps a single `AppleSignInCoordinator` alive for the lifetime of the splash
+/// (the coordinator is a delegate-target, so it must outlive the request).
+final class AppleSignInCoordinatorBox: ObservableObject {
+    let coordinator = AppleSignInCoordinator()
 }
 
 // MARK: - Background

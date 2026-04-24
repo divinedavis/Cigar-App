@@ -87,22 +87,22 @@ struct EmailAuthView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text(isCreating ? "Let's get started." : "Welcome back.")
-                .font(.system(size: 13, weight: .regular))
+                .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.55))
                 .contentTransition(.opacity)
 
             Text(isCreating ? "Create your Maduro account." : "Sign in to Maduro.")
-                .font(.system(size: 56, weight: .black))
-                .tracking(-1.2)
+                .font(.system(size: 48, weight: .heavy, design: .rounded))
+                .tracking(-0.8)
                 .foregroundStyle(.white)
-                .lineSpacing(-6)
+                .lineSpacing(-4)
                 .fixedSize(horizontal: false, vertical: true)
                 .contentTransition(.opacity)
 
             Text(isCreating
                  ? "Share what you smoke, find what's next."
                  : "Your lounge, cigars, and pairings are waiting.")
-                .font(.system(size: 13, weight: .regular))
+                .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.7))
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)

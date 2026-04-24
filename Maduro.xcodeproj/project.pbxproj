@@ -27,6 +27,7 @@
 		AEDC1178A12FE11A9B91DDF9 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66ACB14FF6102D27BB3B373B /* SplashView.swift */; };
 		B39263B9CDC4F18F522A7DEF /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2773463D8C25C6C521B23 /* SearchView.swift */; };
 		C6E75DD75EC41C7CC1259379 /* CommentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FFF967873B2889A6B38D75 /* CommentsView.swift */; };
+		C87BAEBE4F6B75E473094B30 /* AppleSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817C33D686E901A529CC4450 /* AppleSignIn.swift */; };
 		CAF8117516570ADE52FD4576 /* FeedController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E50450A8EAFBE9E2A3627423 /* FeedController.swift */; };
 		D7AA6F7E41A82F7219D4B90B /* MessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A62C1A4F0BDCB43245F67EF /* MessagesView.swift */; };
 		EC654904C02EF0CCD5E27959 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF5C7E931E50D818B0D90EDF /* SampleData.swift */; };
@@ -48,6 +49,7 @@
 		71A2773463D8C25C6C521B23 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		7A6B77EE52F5D28AB792CFA6 /* CigarReviewsData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CigarReviewsData.swift; sourceTree = "<group>"; };
 		7EBEF8929A1D07F0A3143055 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		817C33D686E901A529CC4450 /* AppleSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignIn.swift; sourceTree = "<group>"; };
 		94350356347A97CDE6008430 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		B6B97A812EA50429E19FB8FF /* MaduroApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaduroApp.swift; sourceTree = "<group>"; };
 		B8FFF967873B2889A6B38D75 /* CommentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsView.swift; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 			isa = PBXGroup;
 			children = (
 				D236B2B0F46F8DC2E11EF48E /* AdSlotPlanner.swift */,
+				817C33D686E901A529CC4450 /* AppleSignIn.swift */,
 				6637F1D47CECCBA14D83A32A /* Assets.xcassets */,
 				30CA96CEB630D5D3D45C9043 /* AuthView.swift */,
 				D0F6D72CE94987C510E5D6DB /* CigarCatalog.swift */,
@@ -198,6 +201,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D27C49BCB1BCA18E221DF91 /* AdSlotPlanner.swift in Sources */,
+				C87BAEBE4F6B75E473094B30 /* AppleSignIn.swift in Sources */,
 				225C808FA9A11628795D1910 /* AuthView.swift in Sources */,
 				900A68C257ECECDB11B94EC3 /* CigarCatalog.swift in Sources */,
 				42E3CA165A3ABDD14AB58DDA /* CigarDetailView.swift in Sources */,
@@ -260,7 +264,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 10;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = CG89RY4W6R;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -321,7 +325,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 10;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = CG89RY4W6R;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
