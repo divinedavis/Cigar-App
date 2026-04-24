@@ -2,10 +2,6 @@
   <img src="images/banner.png" alt="Maduro — a social club for cigar enthusiasts" width="100%"/>
 </p>
 
-<p align="center">
-  <img src="images/logo.png" alt="Maduro logo" width="120"/>
-</p>
-
 # Maduro
 
 A social app for cigar enthusiasts. TikTok-style For You feed, cigar-shaped reactions, auto-detection of cigar lounges via Apple Maps, and a separate ad portal for verified business accounts.

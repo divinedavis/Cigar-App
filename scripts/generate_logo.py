@@ -180,7 +180,6 @@ def main() -> None:
     build_app_icon(ROOT / "Maduro" / "Assets.xcassets" / "AppIcon.appiconset" / "AppIcon-1024.png")
     build_splash_logo(ROOT / "Maduro" / "Assets.xcassets" / "MaduroLogo.imageset" / "MaduroLogo.png")
     (ROOT / "images").mkdir(exist_ok=True)
-    build_readme_logo(ROOT / "images" / "logo.png")
     build_readme_banner(ROOT / "images" / "banner.png")
 
 
