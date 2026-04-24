@@ -33,6 +33,7 @@ targets:
       path: Maduro/Info.plist
       properties:
         CFBundleDisplayName: Maduro
+        CFBundleIconName: AppIcon
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSRequiresIPhoneOS: true
