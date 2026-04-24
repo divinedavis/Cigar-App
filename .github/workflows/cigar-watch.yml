@@ -1,0 +1,33 @@
+name: Cigar watch
+
+# Diff cigarsinternational's sitemap against the Supabase URL snapshot and
+# scrape any new products. Runs weekly; can also be triggered by hand.
+#
+# GitHub Actions cron is always UTC — there is no timezone option. 10:00 UTC
+# is 06:00 EDT from March to November and 05:00 EST from November to March,
+# which is close enough to "Monday morning" for a catalog delta job.
+on:
+  schedule:
+    - cron: '0 10 * * 1'
+  workflow_dispatch:
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install --quiet curl-cffi beautifulsoup4
+
+      - name: Run watch
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_BUCKET: cigars
+        run: python3 scripts/scrape_cigars.py watch

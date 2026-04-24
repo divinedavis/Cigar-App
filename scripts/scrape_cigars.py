@@ -510,6 +510,162 @@ def cmd_upload(args: argparse.Namespace) -> None:
     log.info("uploaded %d images", updated)
 
 
+def _env_allow_env_vars() -> Dict[str, str]:
+    """Like _load_env() but fall back to process env for GitHub Actions runs."""
+    env_path = ROOT / "scripts" / "scraper.env"
+    env: Dict[str, str] = {}
+    if env_path.exists():
+        for line in env_path.read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                env[k.strip()] = v.strip()
+    for key in ("SUPABASE_URL", "SUPABASE_KEY", "SUPABASE_BUCKET"):
+        if os.environ.get(key):
+            env[key] = os.environ[key]
+        if not env.get(key):
+            raise SystemExit(f"{key} missing (set in scripts/scraper.env or env var)")
+    return env
+
+
+def _storage_download_text(env: Dict[str, str], path: str) -> Optional[str]:
+    url = f"{env['SUPABASE_URL']}/storage/v1/object/{env['SUPABASE_BUCKET']}/{path}"
+    r = requests.get(url, impersonate=IMPERSONATE, timeout=30,
+                     headers={"Authorization": f"Bearer {env['SUPABASE_KEY']}",
+                              "apikey": env["SUPABASE_KEY"]})
+    if r.status_code == 200:
+        return r.text
+    if r.status_code == 404:
+        return None
+    log.warning("download %s -> %s", path, r.status_code)
+    return None
+
+
+def _storage_upload_text(env: Dict[str, str], path: str, body: str,
+                         content_type: str = "text/plain") -> bool:
+    endpoint = f"{env['SUPABASE_URL']}/storage/v1/object/{env['SUPABASE_BUCKET']}/{path}"
+    headers = {
+        "Authorization": f"Bearer {env['SUPABASE_KEY']}",
+        "apikey": env["SUPABASE_KEY"],
+        "Content-Type": content_type,
+        "x-upsert": "true",
+    }
+    r = requests.post(endpoint, data=body.encode("utf-8"),
+                      headers=headers, impersonate=IMPERSONATE, timeout=60)
+    if r.status_code in (200, 201):
+        return True
+    log.warning("upload %s -> %s %s", path, r.status_code, r.text[:200])
+    return False
+
+
+META_URLS_PATH = "_meta/urls_seen.txt"
+META_JSONL_PATH = "_meta/cigars.jsonl"
+META_JSON_PATH = "_meta/cigars.json"
+
+
+def cmd_watch(args: argparse.Namespace) -> None:
+    """Diff the live sitemap against Supabase's known-URL snapshot and scrape only the new ones."""
+    env = _env_allow_env_vars()
+
+    # 1. Previous snapshot. First-run seed: write the current sitemap and exit.
+    prev_txt = _storage_download_text(env, META_URLS_PATH)
+    current = set(discover_urls())
+    log.info("sitemap has %d products", len(current))
+
+    if prev_txt is None:
+        log.info("seeding %s (first run) — no scraping", META_URLS_PATH)
+        _storage_upload_text(env, META_URLS_PATH, "\n".join(sorted(current)) + "\n")
+        return
+
+    previous = {line.strip() for line in prev_txt.splitlines() if line.strip()}
+    new_urls = sorted(current - previous)
+    log.info("%d new products since last run", len(new_urls))
+    if not new_urls:
+        return
+
+    # 2. Scrape each new URL; append directly to a local jsonl buffer.
+    new_records: List[dict] = []
+    for url in new_urls:
+        r = http_get(url)
+        if r is None:
+            continue
+        try:
+            cigar = parse_product(url, r.text)
+        except Exception as exc:
+            log.exception("parse failed for %s: %s", url, exc)
+            continue
+        if cigar is None or not _looks_like_cigar(cigar):
+            continue
+        new_records.append(_asdict(cigar))
+        log.info("NEW: %s", cigar.name)
+        polite_sleep()
+
+    # 3. Upload every image for each new record.
+    for rec in new_records:
+        slug = rec["slug"]
+        images = []
+        if rec.get("hero_image"): images.append(("hero", rec["hero_image"]))
+        for i, si in enumerate(rec.get("size_images", [])):
+            images.append((f"size-{i}", si))
+        for tag, img in images:
+            if not img.get("source_url") or img.get("public_url"):
+                continue
+            local = _local_image_path(slug, img["source_url"], suffix=tag)
+            if not _download_image(img["source_url"], local):
+                continue
+            storage_path = f"{slug}/{local.name}"
+            public = _supabase_upload(env, local, storage_path)
+            if public:
+                img["storage_path"] = storage_path
+                img["public_url"] = public
+            polite_sleep(0.1, 0.3)
+
+    # 4. Append to the rolling jsonl blob in Storage.
+    existing = _storage_download_text(env, META_JSONL_PATH) or ""
+    appended = existing
+    if existing and not existing.endswith("\n"):
+        appended += "\n"
+    appended += "\n".join(json.dumps(r) for r in new_records) + "\n"
+    _storage_upload_text(env, META_JSONL_PATH, appended, content_type="application/x-ndjson")
+
+    # 5. Rebuild the consolidated cigars.json (apps consume this).
+    all_records: List[dict] = []
+    for line in appended.splitlines():
+        if line.strip():
+            try:
+                all_records.append(json.loads(line))
+            except Exception:
+                continue
+    _storage_upload_text(
+        env, META_JSON_PATH,
+        json.dumps({"cigars": all_records}, indent=2),
+        content_type="application/json",
+    )
+
+    # 6. Commit the new URL snapshot only after a successful run.
+    _storage_upload_text(env, META_URLS_PATH, "\n".join(sorted(current)) + "\n")
+    log.info("added %d new cigars (total now %d)", len(new_records), len(all_records))
+
+
+def cmd_seed_watch(args: argparse.Namespace) -> None:
+    """One-time: seed Supabase's known-URL snapshot so the first watch run doesn't treat every
+    product as new. Also uploads the current local jsonl/json as the starting corpus."""
+    env = _env_allow_env_vars()
+    urls = [u.strip() for u in URLS_FILE.read_text().splitlines() if u.strip()] \
+        if URLS_FILE.exists() else sorted(discover_urls())
+    _storage_upload_text(env, META_URLS_PATH, "\n".join(urls) + "\n")
+    log.info("seeded %s with %d urls", META_URLS_PATH, len(urls))
+
+    if JSONL_FILE.exists():
+        _storage_upload_text(env, META_JSONL_PATH, JSONL_FILE.read_text(),
+                             content_type="application/x-ndjson")
+        log.info("uploaded %s", META_JSONL_PATH)
+    if FINAL_JSON.exists():
+        _storage_upload_text(env, META_JSON_PATH, FINAL_JSON.read_text(),
+                             content_type="application/json")
+        log.info("uploaded %s", META_JSON_PATH)
+
+
 def cmd_export(args: argparse.Namespace) -> None:
     if not JSONL_FILE.exists():
         raise SystemExit("run `scrape` first")
@@ -537,6 +693,9 @@ def main() -> None:
 
     sub.add_parser("upload", help="upload images to Supabase Storage").set_defaults(fn=cmd_upload)
     sub.add_parser("export", help="collapse jsonl -> cigars.json").set_defaults(fn=cmd_export)
+
+    sub.add_parser("watch", help="diff the sitemap vs Supabase snapshot and scrape only new products").set_defaults(fn=cmd_watch)
+    sub.add_parser("seed-watch", help="seed Supabase with current URL list so watch can diff").set_defaults(fn=cmd_seed_watch)
 
     sp = sub.add_parser("all", help="discover + scrape + upload + export")
     sp.add_argument("--limit", type=int, default=0)
