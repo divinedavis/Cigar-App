@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct StogieApp: App {
+struct MaduroApp: App {
     @StateObject private var session = SessionStore()
 
     var body: some Scene {

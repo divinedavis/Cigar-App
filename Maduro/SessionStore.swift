@@ -14,7 +14,7 @@ final class SessionStore: ObservableObject {
     }
     @Published var isSubscribed: Bool = false
 
-    private let storageKey = "stogie.currentUser.v1"
+    private let storageKey = "maduro.currentUser.v1"
 
     init() {
         currentUser = loadPersisted()

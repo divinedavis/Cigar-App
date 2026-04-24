@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Stogie</string>
+	<string>Maduro</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -25,15 +25,15 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Stogie needs the camera so you can capture photos and videos of your cigars.</string>
+	<string>Maduro needs the camera so you can capture photos and videos of your cigars.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Stogie uses your location to auto-tag the cigar lounge or shop you're at when you post.</string>
+	<string>Maduro uses your location to auto-tag the cigar lounge or shop you're at when you post.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Stogie records audio alongside your videos.</string>
+	<string>Maduro records audio alongside your videos.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Stogie saves your captured moments to your photo library.</string>
+	<string>Maduro saves your captured moments to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Stogie lets you pick photos and videos from your library to post.</string>
+	<string>Maduro lets you pick photos and videos from your library to post.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

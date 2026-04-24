@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Bumps CFBundleVersion, regenerates the Xcode project with xcodegen,
-# archives, exports, and uploads Stogie to TestFlight.
+# archives, exports, and uploads Maduro to TestFlight.
 #
 # Runs after every code change so the latest state is always testable.
 # Requires scripts/asc-config.env (gitignored) with real ASC credentials.
@@ -18,12 +18,12 @@ fi
 # shellcheck disable=SC1091
 source scripts/asc-config.env
 
-PROJECT="Stogie.xcodeproj"
-SCHEME="Stogie"
+PROJECT="Maduro.xcodeproj"
+SCHEME="Maduro"
 PBXPROJ="$PROJECT/project.pbxproj"
-ARCHIVE="build/Stogie.xcarchive"
+ARCHIVE="build/Maduro.xcarchive"
 EXPORT_DIR="build/export"
-IPA="$EXPORT_DIR/Stogie.ipa"
+IPA="$EXPORT_DIR/Maduro.ipa"
 
 # 0. Regenerate project from project.yml if xcodegen is available.
 if command -v xcodegen >/dev/null 2>&1; then

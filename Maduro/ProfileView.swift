@@ -75,7 +75,7 @@ struct ProfileView: View {
                 .font(.footnote)
                 .foregroundStyle(.orange)
             Text(session.isSubscribed
-                 ? "Stogie Premium · ad-free"
+                 ? "Maduro Premium · ad-free"
                  : "Free account · ads every 4–10 posts")
                 .font(.footnote)
                 .foregroundStyle(.white.opacity(0.85))
@@ -92,7 +92,7 @@ struct ProfileView: View {
                 Button {
                     session.isSubscribed = true
                 } label: {
-                    Text("Go ad-free with Stogie Premium")
+                    Text("Go ad-free with Maduro Premium")
                         .font(.headline)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -175,7 +175,7 @@ private struct ProfileCard: View {
                 Divider().background(.white.opacity(0.15))
                 StatRow(value: "0", label: "Reactions")
                 Divider().background(.white.opacity(0.15))
-                StatRow(value: "\(yearsOnStogie)", label: yearsOnStogie == 1 ? "Year on Stogie" : "Years on Stogie")
+                StatRow(value: "\(yearsOnMaduro)", label: yearsOnMaduro == 1 ? "Year on Maduro" : "Years on Maduro")
             }
             .frame(maxWidth: .infinity)
         }
@@ -192,7 +192,7 @@ private struct ProfileCard: View {
         return parts.compactMap { $0.first.map(String.init) }.joined().uppercased()
     }
 
-    private var yearsOnStogie: Int {
+    private var yearsOnMaduro: Int {
         // Placeholder until we have a createdAt on AppUser. Always 1 for new accounts.
         1
     }

@@ -1,4 +1,4 @@
-# Stogie
+# Maduro
 
 A social app for cigar enthusiasts. TikTok-style For You feed, cigar-shaped reactions, auto-detection of cigar lounges via Apple Maps, and a separate ad portal for verified business accounts.
 
@@ -34,11 +34,11 @@ brew install xcodegen
 xcodegen generate
 
 # 3. Create your local config (gitignored)
-cp Stogie/Config.swift.example Stogie/Config.swift
-# edit Stogie/Config.swift with your Supabase URL + anon key
+cp Maduro/Config.swift.example Maduro/Config.swift
+# edit Maduro/Config.swift with your Supabase URL + anon key
 
 # 4. Open
-open Stogie.xcodeproj
+open Maduro.xcodeproj
 ```
 
 ## Shipping

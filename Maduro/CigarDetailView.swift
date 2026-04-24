@@ -89,7 +89,7 @@ struct CigarDetailView: View {
                 .font(.subheadline)
                 .foregroundStyle(.white.opacity(0.7))
                 .multilineTextAlignment(.center)
-            Text("This cigar is in the **top \(topPercent)%** of Stogie's catalog based on ratings, reviews, and pairings.")
+            Text("This cigar is in the **top \(topPercent)%** of Maduro's catalog based on ratings, reviews, and pairings.")
                 .font(.footnote)
                 .foregroundStyle(.white.opacity(0.65))
                 .multilineTextAlignment(.center)

@@ -1,6 +1,6 @@
--- Stogie — Supabase schema (v1 scaffold)
+-- Maduro — Supabase schema (v1 scaffold)
 --
--- Run this against the Stogie Supabase project to create the base
+-- Run this against the Maduro Supabase project to create the base
 -- tables. RLS policies are intentionally permissive here and should
 -- be tightened per-table before production.
 

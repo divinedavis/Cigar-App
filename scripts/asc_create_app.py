@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Idempotently create the Stogie app record in App Store Connect.
+"""Idempotently create the Maduro app record in App Store Connect.
 
 Reads scripts/asc-config.env for credentials. Performs:
   1. Register the bundle ID in the developer portal if missing.
@@ -24,8 +24,8 @@ import requests
 CONFIG_PATH = pathlib.Path(__file__).resolve().parent / "asc-config.env"
 API_BASE = "https://api.appstoreconnect.apple.com/v1"
 
-APP_NAME = "Stogie"
-SKU = "stogie-ios-001"
+APP_NAME = "Maduro"
+SKU = "maduro-ios-001"
 PRIMARY_LOCALE = "en-US"
 
 

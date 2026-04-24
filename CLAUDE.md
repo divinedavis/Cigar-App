@@ -1,4 +1,4 @@
-# Stogie — Claude working notes
+# Maduro — Claude working notes
 
 ## Project one-liner
 
@@ -25,9 +25,9 @@ Never commit files containing secrets — API keys, Supabase service role, signi
 ```
 Cigar-App/
 ├── project.yml                # xcodegen spec — single source of truth for Xcode project
-├── Stogie.xcodeproj/          # generated; committed so CI + ship.sh work without xcodegen install
-├── Stogie/
-│   ├── StogieApp.swift        # @main entry
+├── Maduro.xcodeproj/          # generated; committed so CI + ship.sh work without xcodegen install
+├── Maduro/
+│   ├── MaduroApp.swift        # @main entry
 │   ├── MainTabView.swift      # 3-tab shell (For You / Post / Profile)
 │   ├── AuthView.swift         # sign in / sign up with 21+ DOB gate
 │   ├── ForYouView.swift       # vertical swipeable feed, cigar reactions
@@ -44,7 +44,7 @@ Cigar-App/
 │   ├── Models.swift
 │   ├── SessionStore.swift
 │   ├── Info.plist
-│   ├── Stogie.entitlements
+│   ├── Maduro.entitlements
 │   └── Assets.xcassets/
 ├── scripts/
 │   ├── ship.sh                # archive + upload to TestFlight

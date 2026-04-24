@@ -1,4 +1,4 @@
-name: Stogie
+name: Maduro
 options:
   bundleIdPrefix: com.divinedavis
   deploymentTarget:
@@ -18,21 +18,21 @@ packages:
     url: https://github.com/supabase-community/supabase-swift
     from: 2.0.0
 targets:
-  Stogie:
+  Maduro:
     type: application
     platform: iOS
     sources:
-      - path: Stogie
+      - path: Maduro
         excludes:
           - "Config.swift.example"
           - "Info.plist"
-          - "Stogie.entitlements"
+          - "Maduro.entitlements"
     resources:
-      - path: Stogie/Assets.xcassets
+      - path: Maduro/Assets.xcassets
     info:
-      path: Stogie/Info.plist
+      path: Maduro/Info.plist
       properties:
-        CFBundleDisplayName: Stogie
+        CFBundleDisplayName: Maduro
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSRequiresIPhoneOS: true
@@ -44,14 +44,14 @@ targets:
           - UIInterfaceOrientationPortrait
         UIRequiredDeviceCapabilities:
           - armv7
-        NSLocationWhenInUseUsageDescription: "Stogie uses your location to auto-tag the cigar lounge or shop you're at when you post."
-        NSCameraUsageDescription: "Stogie needs the camera so you can capture photos and videos of your cigars."
-        NSMicrophoneUsageDescription: "Stogie records audio alongside your videos."
-        NSPhotoLibraryUsageDescription: "Stogie lets you pick photos and videos from your library to post."
-        NSPhotoLibraryAddUsageDescription: "Stogie saves your captured moments to your photo library."
+        NSLocationWhenInUseUsageDescription: "Maduro uses your location to auto-tag the cigar lounge or shop you're at when you post."
+        NSCameraUsageDescription: "Maduro needs the camera so you can capture photos and videos of your cigars."
+        NSMicrophoneUsageDescription: "Maduro records audio alongside your videos."
+        NSPhotoLibraryUsageDescription: "Maduro lets you pick photos and videos from your library to post."
+        NSPhotoLibraryAddUsageDescription: "Maduro saves your captured moments to your photo library."
         ITSAppUsesNonExemptEncryption: false
     entitlements:
-      path: Stogie/Stogie.entitlements
+      path: Maduro/Maduro.entitlements
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.divinedavis.stogie

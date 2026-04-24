@@ -11,11 +11,9 @@ enum AuthRoute: Hashable {
 
 struct AuthView: View {
     @EnvironmentObject var session: SessionStore
+    @Environment(\.dismiss) private var dismiss
     @State private var path: [AuthRoute] = []
-    @State private var country: PhoneCountry = .us
-    @State private var phone: String = ""
     @State private var showAppleSoon = false
-    @State private var showFacebookSoon = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -26,19 +24,24 @@ struct AuthView: View {
                 )
                 .ignoresSafeArea()
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 22) {
-                        header
-                        phoneCard
-                        disclaimer
-                        continueButton
-                        orDivider
-                        secondaryMethods
-                        Spacer().frame(height: 24)
+                VStack(spacing: 22) {
+                    header
+
+                    Spacer()
+
+                    VStack(spacing: 12) {
+                        Button { path.append(.email) } label: {
+                            ContinueWithRow(icon: "envelope", title: "Continue with email")
+                        }
+                        Button { showAppleSoon = true } label: {
+                            ContinueWithRow(icon: "applelogo", title: "Continue with Apple")
+                        }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 14)
+
+                    Spacer().frame(height: 24)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 14)
             }
             .navigationDestination(for: AuthRoute.self) { route in
                 switch route {
@@ -50,10 +53,6 @@ struct AuthView: View {
             }
             .alert("Apple sign-in coming soon",
                    isPresented: $showAppleSoon) {
-                Button("OK") {}
-            }
-            .alert("Facebook sign-in coming soon",
-                   isPresented: $showFacebookSoon) {
                 Button("OK") {}
             }
         }
@@ -69,112 +68,17 @@ struct AuthView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .center)
             HStack {
-                Spacer()
-                Button { } label: {
+                Button { dismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.7))
+                        .foregroundStyle(.white.opacity(0.85))
                         .padding(8)
-                        .background(.white.opacity(0.08), in: .circle)
+                        .background(.white.opacity(0.12), in: .circle)
                 }
-                .opacity(0)
-                .accessibilityHidden(true)
+                Spacer()
             }
         }
         .padding(.bottom, 4)
-    }
-
-    private var phoneCard: some View {
-        VStack(spacing: 0) {
-            Menu {
-                ForEach(PhoneCountry.list) { c in
-                    Button("\(c.name) (+\(c.code))") { country = c }
-                }
-            } label: {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Country/Region")
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.6))
-                        Text("\(country.name) (+\(country.code))")
-                            .foregroundStyle(.white)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.down")
-                        .foregroundStyle(.white.opacity(0.6))
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-            }
-
-            Divider().background(.white.opacity(0.12))
-
-            TextField("", text: $phone, prompt:
-                Text("Phone number").foregroundStyle(.white.opacity(0.55))
-            )
-            .keyboardType(.phonePad)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 14)
-            .foregroundStyle(.white)
-        }
-        .background(.white.opacity(0.04))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(.white.opacity(0.25), lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-
-    private var disclaimer: some View {
-        Text("We'll call or text to confirm your number. Standard message and data rates apply.")
-            .font(.footnote)
-            .foregroundStyle(.white.opacity(0.65))
-    }
-
-    private var continueButton: some View {
-        Button {
-            let trimmed = phone.trimmingCharacters(in: .whitespaces)
-            guard !trimmed.isEmpty else { return }
-            path.append(.ageGate(
-                method: "phone",
-                identifier: "+\(country.code)\(trimmed)",
-                displayName: ""
-            ))
-        } label: {
-            Text("Continue")
-                .font(.headline)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-        }
-        .background(Color.orange, in: .rect(cornerRadius: 12))
-    }
-
-    private var orDivider: some View {
-        HStack(spacing: 12) {
-            Rectangle().fill(.white.opacity(0.18)).frame(height: 1)
-            Text("or")
-                .font(.footnote)
-                .foregroundStyle(.white.opacity(0.6))
-            Rectangle().fill(.white.opacity(0.18)).frame(height: 1)
-        }
-        .padding(.vertical, 4)
-    }
-
-    private var secondaryMethods: some View {
-        VStack(spacing: 12) {
-            Button { path.append(.email) } label: {
-                ContinueWithRow(icon: "envelope", title: "Continue with email")
-            }
-            Button { showAppleSoon = true } label: {
-                ContinueWithRow(icon: "applelogo", title: "Continue with Apple")
-            }
-            Button { showFacebookSoon = true } label: {
-                ContinueWithRow(icon: "f.circle.fill",
-                                title: "Continue with Facebook",
-                                iconColor: Color(red: 0.23, green: 0.35, blue: 0.60))
-            }
-        }
     }
 }
 
@@ -249,8 +153,8 @@ struct EmailAuthView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    StogieField("Email", text: $email, keyboard: .emailAddress)
-                    StogieSecureField("Password", text: $password)
+                    MaduroField("Email", text: $email, keyboard: .emailAddress)
+                    MaduroSecureField("Password", text: $password)
 
                     if let error {
                         Text(error)
@@ -332,13 +236,13 @@ struct AgeGateView: View {
                         Text("One last thing")
                             .font(.title2).bold()
                             .foregroundStyle(.white)
-                        Text("Stogie is for adults 21 and over.")
+                        Text("Maduro is for adults 21 and over.")
                             .font(.subheadline)
                             .foregroundStyle(.white.opacity(0.7))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                    StogieField("Display name", text: $name)
+                    MaduroField("Display name", text: $name)
 
                     DatePicker("Date of birth",
                                selection: $dob,
@@ -390,7 +294,7 @@ struct AgeGateView: View {
     private func create() {
         let age = Calendar.current.dateComponents([.year], from: dob, to: Date()).year ?? 0
         guard age >= 21 else {
-            error = "You must be 21 or older to use Stogie."
+            error = "You must be 21 or older to use Maduro."
             return
         }
         let trimmed = name.trimmingCharacters(in: .whitespaces)
@@ -404,7 +308,7 @@ struct AgeGateView: View {
             .joined(separator: "_")
         let user = AppUser(
             id: UUID(),
-            username: username.isEmpty ? "stogie_user" : username,
+            username: username.isEmpty ? "maduro_user" : username,
             displayName: trimmed,
             bio: "",
             avatarURL: nil,
@@ -419,7 +323,7 @@ struct AgeGateView: View {
 
 // MARK: - Field primitives
 
-struct StogieField: View {
+struct MaduroField: View {
     let label: String
     @Binding var text: String
     var keyboard: UIKeyboardType = .default
@@ -442,7 +346,7 @@ struct StogieField: View {
     }
 }
 
-struct StogieSecureField: View {
+struct MaduroSecureField: View {
     let label: String
     @Binding var text: String
 

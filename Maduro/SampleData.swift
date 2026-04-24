@@ -42,7 +42,7 @@ enum SamplePosts {
             Post(
                 id: UUID(),
                 authorID: UUID(),
-                mediaURL: SampleMedia.photo(seed: "stogie-post-\(i)"),
+                mediaURL: SampleMedia.photo(seed: "maduro-post-\(i)"),
                 mediaKind: .photo,
                 caption: captions[i % captions.count],
                 cigarID: CigarCatalog.all.randomElement()?.id,
