@@ -81,3 +81,7 @@ APIKeys.swift
 
 # Local tooling / agent state
 .claude/
+
+# Scraper artifacts (local only)
+scripts/cigars_data/
+scripts/scraper.env
