@@ -9,51 +9,49 @@ A social app for cigar enthusiasts. TikTok-style For You feed, cigar-shaped reac
 
 ## Features
 
-- **For You feed** — vertical swipeable video/photo posts.
-- **Cigar reaction** — a cigar icon replaces the heart/like.
-- **Auto location** — Apple Maps (MKLocalSearch) finds cigar lounges, shops, and tobacconists near you and auto-suggests them when you post.
-- **Cigar tagging** — tag the exact brand/line/vitola from a curated catalog.
-- **Age gate** — date-of-birth check at signup, 21+ only.
-- **Business accounts** — verified badge + ability to run ads from a separate portal.
-- **Free tier ads** — injected every 4–10 posts, minimum 4-post gap between ads.
+- **For You feed** — vertical, full-screen paging feed of videos and photos with looping playback.
+- **Cigar reactions** — a cigar icon replaces the heart; tap to "light it" and the ember glows red.
+- **Cigar catalog** — tag the exact brand, line, and vitola from a curated list of popular cigars.
+- **Cigar detail + reviews** — Airbnb-style review screen with a big rating, laurel wreaths, and community reviews.
+- **Search** — searchable cigar index that pushes into detail pages.
+- **Auto location** — Apple MapKit (`MKLocalSearch`) finds nearby cigar lounges, tobacconists, and shops and auto-suggests them when you post.
+- **21+ age gate** — DOB picker at signup, enforced client-side.
+- **Business accounts** — verified badge and the ability to run ads from a separate portal.
+- **Ads** — injected every 4–10 posts with a minimum 4-post gap; served from the user's own ad portal (no AdMob / Meta).
+- **Animated splash** — custom SwiftUI ember + smoke background; no external assets or Lottie.
+- **Persistent session** — auth state survives cold starts via `UserDefaults`-backed `SessionStore`.
 
 ## Stack
 
-- iOS 17+ SwiftUI app
-- Supabase for auth, database, storage
-- Apple MapKit for location + nearby-store search
-- TestFlight distribution via `scripts/ship.sh`
+- **UI:** SwiftUI, iOS 17+
+- **Backend:** Supabase (auth, Postgres, storage)
+- **Location:** Apple MapKit + CoreLocation
+- **Media:** `AVQueuePlayer` + `AVPlayerLooper` for muted looping video
+- **Project:** xcodegen (`project.yml` is the source of truth)
 
-## Local setup
+## Screens
 
-```bash
-# 1. Install tooling
-brew install xcodegen
+- **Splash** — animated cigar-smoke background, logo, wordmark, and email / Apple continue buttons.
+- **Email auth** — sign-in by default; toggle to sign-up with animated field transitions.
+- **Age gate** — DOB, display name, and personal/business account type.
+- **For You** — vertical paging feed with cigar reactions, captions, and injected sponsored posts.
+- **Comments** — bottom-sheet thread with centered title and a full-width composer.
+- **Search** — searchable cigar catalog → detail.
+- **Cigar detail** — rating, stats, review list.
+- **Profile** — Airbnb "Meet your host" style hero card with fact rows.
 
-# 2. Generate the Xcode project
-xcodegen generate
+## Design rules
 
-# 3. Create your local config (gitignored)
-cp Maduro/Config.swift.example Maduro/Config.swift
-# edit Maduro/Config.swift with your Supabase URL + anon key
+- Reactions are a cigar icon — never a heart.
+- Location search is Apple Maps only.
+- Ads are served only from the user's own ad portal — no AdMob or Meta SDKs.
+- Age gate uses DOB, not a "21+" checkbox.
+- App Store positioning is community/review — no in-app tobacco purchase flows.
 
-# 4. Open
-open Maduro.xcodeproj
-```
+## Out of v1 scope
 
-## Shipping
-
-After every change:
-
-```bash
-git add -A
-git commit -m "..."
-git push origin main
-./scripts/ship.sh
-```
-
-`ship.sh` bumps the build number, archives, exports, and uploads to TestFlight. Requires `scripts/asc-config.env` (gitignored) — copy from `scripts/asc-config.env.example` and fill in your App Store Connect API key.
+LIVE, Shop, Local, Following, and Explore tabs. DMs / Inbox. Ad portal UI (separate project). Business billing. Follow graph (counts shown as 0 for now).
 
 ## Secrets
 
-Never commit secret-bearing files. The `.gitignore` covers `Config.swift`, `.env*`, `*Secrets*`, `AuthKey_*.p8`, etc. If you add a new kind of secret, add it to `.gitignore` first.
+Never commit secret-bearing files. The `.gitignore` covers `Config.swift`, `.env*`, `*Secrets*`, `AuthKey_*.p8`, and similar patterns. If you add a new kind of secret, add it to `.gitignore` first.
