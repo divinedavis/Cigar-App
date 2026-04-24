@@ -25,17 +25,22 @@ ARCHIVE="build/Maduro.xcarchive"
 EXPORT_DIR="build/export"
 IPA="$EXPORT_DIR/Maduro.ipa"
 
-# 0. Regenerate project from project.yml if xcodegen is available.
+# 0. Bump CURRENT_PROJECT_VERSION in project.yml (source of truth) so
+# xcodegen carries the new value into the generated pbxproj. Otherwise
+# xcodegen would reset it back to project.yml's value on every run.
+current=$(grep -E '^\s*CURRENT_PROJECT_VERSION:' project.yml | awk -F': ' '{print $2}' | tr -d ' "')
+next=$((current + 1))
+echo "==> bumping build $current -> $next"
+sed -i '' -E "s/^([[:space:]]*CURRENT_PROJECT_VERSION:)[[:space:]]*[0-9]+/\1 $next/" project.yml
+
+# 1. Regenerate project from project.yml.
 if command -v xcodegen >/dev/null 2>&1; then
     echo "==> regenerating Xcode project from project.yml"
     xcodegen generate
+else
+    # Fall back to editing pbxproj in place if xcodegen isn't available.
+    sed -i '' "s/CURRENT_PROJECT_VERSION = $current;/CURRENT_PROJECT_VERSION = $next;/g" "$PBXPROJ"
 fi
-
-# 1. Bump CURRENT_PROJECT_VERSION. App Store Connect rejects duplicates.
-current=$(grep -m1 'CURRENT_PROJECT_VERSION = ' "$PBXPROJ" | awk -F'= ' '{print $2}' | tr -d ' ;')
-next=$((current + 1))
-echo "==> bumping build $current -> $next"
-sed -i '' "s/CURRENT_PROJECT_VERSION = $current;/CURRENT_PROJECT_VERSION = $next;/g" "$PBXPROJ"
 
 # 2. Archive.
 echo "==> archiving"
