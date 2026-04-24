@@ -7,82 +7,7 @@ enum AuthRoute: Hashable {
     case ageGate(method: String, identifier: String, displayName: String)
 }
 
-// MARK: - Root
-
-struct AuthView: View {
-    @EnvironmentObject var session: SessionStore
-    @Environment(\.dismiss) private var dismiss
-    @State private var path: [AuthRoute] = []
-    @State private var showAppleSoon = false
-
-    var body: some View {
-        NavigationStack(path: $path) {
-            ZStack {
-                LinearGradient(
-                    colors: [.black, Color(red: 0.18, green: 0.10, blue: 0.04)],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .ignoresSafeArea()
-
-                VStack(spacing: 22) {
-                    header
-
-                    Spacer()
-
-                    VStack(spacing: 12) {
-                        Button { path.append(.email) } label: {
-                            ContinueWithRow(icon: "envelope", title: "Continue with email")
-                        }
-                        Button { showAppleSoon = true } label: {
-                            ContinueWithRow(icon: "applelogo", title: "Continue with Apple")
-                        }
-                    }
-
-                    Spacer().frame(height: 24)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 14)
-            }
-            .navigationDestination(for: AuthRoute.self) { route in
-                switch route {
-                case .email:
-                    EmailAuthView(path: $path)
-                case .ageGate(let method, let identifier, let displayName):
-                    AgeGateView(method: method, identifier: identifier, displayName: displayName)
-                }
-            }
-            .alert("Apple sign-in coming soon",
-                   isPresented: $showAppleSoon) {
-                Button("OK") {}
-            }
-        }
-        .preferredColorScheme(.dark)
-    }
-
-    // MARK: Pieces
-
-    private var header: some View {
-        ZStack {
-            Text("Log in or sign up")
-                .font(.headline)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, alignment: .center)
-            HStack {
-                Button { dismiss() } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.85))
-                        .padding(8)
-                        .background(.white.opacity(0.12), in: .circle)
-                }
-                Spacer()
-            }
-        }
-        .padding(.bottom, 4)
-    }
-}
-
-// MARK: - Secondary method row
+// MARK: - Secondary method row (used by splash Continue buttons)
 
 struct ContinueWithRow: View {
     let icon: String
@@ -103,30 +28,12 @@ struct ContinueWithRow: View {
         .padding(.horizontal, 18)
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity)
+        .background(.white.opacity(0.08), in: .rect(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(.white.opacity(0.35), lineWidth: 1)
+                .stroke(.white.opacity(0.45), lineWidth: 1)
         )
     }
-}
-
-// MARK: - Phone country
-
-struct PhoneCountry: Identifiable, Hashable {
-    let id: String
-    let name: String
-    let code: Int
-
-    static let us  = PhoneCountry(id: "us",  name: "United States",       code: 1)
-    static let ca  = PhoneCountry(id: "ca",  name: "Canada",              code: 1)
-    static let uk  = PhoneCountry(id: "uk",  name: "United Kingdom",      code: 44)
-    static let mx  = PhoneCountry(id: "mx",  name: "Mexico",              code: 52)
-    static let dor = PhoneCountry(id: "do",  name: "Dominican Republic",  code: 1)
-    static let cub = PhoneCountry(id: "cu",  name: "Cuba",                code: 53)
-    static let nic = PhoneCountry(id: "ni",  name: "Nicaragua",           code: 505)
-    static let hon = PhoneCountry(id: "hn",  name: "Honduras",            code: 504)
-
-    static let list: [PhoneCountry] = [.us, .ca, .uk, .mx, .dor, .cub, .nic, .hon]
 }
 
 // MARK: - Email path

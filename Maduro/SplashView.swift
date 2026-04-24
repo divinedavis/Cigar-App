@@ -1,106 +1,99 @@
 import SwiftUI
 
-/// Splash entry shown while the user is signed out. Mirrors the TIDE
-/// app layout: animated background, centered title, tagline, big white
-/// pill button, plain "Log in" text below.
-///
-/// Both Start and Log in present the same AuthView (phone-first sign
-/// up / sign in). We keep them as separate buttons so the entry point
-/// reads naturally; if we later want to default Log in to a different
-/// auth mode we can pass a hint into AuthView.
+/// Splash entry shown while the user is signed out. Animated cigar-
+/// smoke background, logo + wordmark + tagline, and two Continue
+/// buttons at the bottom that route directly into the auth flow
+/// (email form or Apple stub) — no intermediate screen.
 struct SplashView: View {
-    @State private var showAuth = false
+    @EnvironmentObject var session: SessionStore
+    @State private var path: [AuthRoute] = []
+    @State private var showAppleSoon = false
     @State private var titleAppeared = false
 
     var body: some View {
-        ZStack {
-            AnimatedSmokeBackground()
+        NavigationStack(path: $path) {
+            ZStack {
+                AnimatedSmokeBackground()
 
-            // Top status-bar-area dim so signal/battery icons stay legible.
-            VStack {
-                LinearGradient(
-                    colors: [.black.opacity(0.45), .clear],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .frame(height: 140)
-                Spacer()
-            }
-            .ignoresSafeArea()
-            .allowsHitTesting(false)
+                // Top status-bar-area dim so signal/battery icons stay legible.
+                VStack {
+                    LinearGradient(
+                        colors: [.black.opacity(0.45), .clear],
+                        startPoint: .top, endPoint: .bottom
+                    )
+                    .frame(height: 140)
+                    Spacer()
+                }
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
 
-            // Bottom dim so the white button + Log in text always pop
-            // even when the embers are bright.
-            VStack {
-                Spacer()
-                LinearGradient(
-                    colors: [.clear, .black.opacity(0.7)],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .frame(height: 360)
-            }
-            .ignoresSafeArea()
-            .allowsHitTesting(false)
+                // Bottom dim so the buttons always pop even when embers are bright.
+                VStack {
+                    Spacer()
+                    LinearGradient(
+                        colors: [.clear, .black.opacity(0.75)],
+                        startPoint: .top, endPoint: .bottom
+                    )
+                    .frame(height: 380)
+                }
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
 
-            // Logo + tagline — sits roughly in the upper third.
-            VStack(spacing: 18) {
-                Spacer().frame(height: 90)
+                // Logo + tagline — sits roughly in the upper third.
+                VStack(spacing: 18) {
+                    Spacer().frame(height: 90)
 
-                Image("MaduroLogo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 200, height: 200)
-                    .shadow(color: .black.opacity(0.5), radius: 14, y: 4)
-                    .opacity(titleAppeared ? 1 : 0)
-                    .scaleEffect(titleAppeared ? 1 : 0.92)
+                    Image("MaduroLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 200, height: 200)
+                        .shadow(color: .black.opacity(0.5), radius: 14, y: 4)
+                        .opacity(titleAppeared ? 1 : 0)
+                        .scaleEffect(titleAppeared ? 1 : 0.92)
 
-                Text("M A D U R O")
-                    .font(.system(size: 32, weight: .light, design: .default))
-                    .tracking(10)
-                    .foregroundStyle(.white)
-                    .shadow(color: .black.opacity(0.6), radius: 8, y: 2)
-                    .opacity(titleAppeared ? 1 : 0)
-                    .offset(y: titleAppeared ? 0 : 10)
+                    Text("M A D U R O")
+                        .font(.system(size: 32, weight: .light, design: .default))
+                        .tracking(10)
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.6), radius: 8, y: 2)
+                        .opacity(titleAppeared ? 1 : 0)
+                        .offset(y: titleAppeared ? 0 : 10)
 
-                Text("A community for cigar lovers —\nshare, savor, discover.")
-                    .font(.subheadline)
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.white.opacity(0.75))
-                    .lineSpacing(4)
-                    .padding(.horizontal, 40)
-                    .opacity(titleAppeared ? 1 : 0)
+                    Text("A community for cigar lovers —\nshare, savor, discover.")
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.white.opacity(0.75))
+                        .lineSpacing(4)
+                        .padding(.horizontal, 40)
+                        .opacity(titleAppeared ? 1 : 0)
 
-                Spacer()
-            }
+                    Spacer()
+                }
 
-            // Bottom CTAs.
-            VStack(spacing: 18) {
-                Spacer()
-                Button {
-                    showAuth = true
-                } label: {
-                    Text("Start")
-                        .font(.headline)
-                        .foregroundStyle(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(.white, in: .capsule)
-                        .shadow(color: .black.opacity(0.4), radius: 10, y: 4)
+                // Bottom auth CTAs.
+                VStack(spacing: 12) {
+                    Spacer()
+                    Button { path.append(.email) } label: {
+                        ContinueWithRow(icon: "envelope", title: "Continue with email")
+                    }
+                    Button { showAppleSoon = true } label: {
+                        ContinueWithRow(icon: "applelogo", title: "Continue with Apple")
+                    }
                 }
                 .padding(.horizontal, 24)
-
-                Button {
-                    showAuth = true
-                } label: {
-                    Text("Log in")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .padding(.vertical, 8)
-                }
-                .padding(.bottom, 18)
+                .padding(.bottom, 28)
             }
-        }
-        .fullScreenCover(isPresented: $showAuth) {
-            AuthView()
+            .navigationDestination(for: AuthRoute.self) { route in
+                switch route {
+                case .email:
+                    EmailAuthView(path: $path)
+                case .ageGate(let method, let identifier, let displayName):
+                    AgeGateView(method: method, identifier: identifier, displayName: displayName)
+                }
+            }
+            .alert("Apple sign-in coming soon", isPresented: $showAppleSoon) {
+                Button("OK") {}
+            }
         }
         .preferredColorScheme(.dark)
         .onAppear {
