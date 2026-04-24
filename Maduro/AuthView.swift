@@ -85,24 +85,26 @@ struct EmailAuthView: View {
     // MARK: Header
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 18) {
             Text(isCreating ? "Let's get started." : "Welcome back.")
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.6))
+                .font(.system(size: 13, weight: .regular))
+                .foregroundStyle(.white.opacity(0.55))
                 .contentTransition(.opacity)
 
-            Text(isCreating ? "Create your\nMaduro account." : "Sign in to\nMaduro.")
-                .font(.system(size: 42, weight: .heavy))
+            Text(isCreating ? "Create your Maduro account." : "Sign in to Maduro.")
+                .font(.system(size: 56, weight: .black))
+                .tracking(-1.2)
                 .foregroundStyle(.white)
-                .lineSpacing(2)
+                .lineSpacing(-6)
                 .fixedSize(horizontal: false, vertical: true)
                 .contentTransition(.opacity)
 
             Text(isCreating
                  ? "Share what you smoke, find what's next."
                  : "Your lounge, cigars, and pairings are waiting.")
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.65))
+                .font(.system(size: 13, weight: .regular))
+                .foregroundStyle(.white.opacity(0.7))
+                .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
                 .contentTransition(.opacity)
         }
