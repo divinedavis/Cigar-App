@@ -38,12 +38,14 @@ enum SamplePosts {
             "Bourbon and a Behike. Don't tell my wife.",
             "Cigar trip to the Dominican was unreal."
         ]
+        let videos = SampleMedia.videos
         return (0..<count).map { i in
-            Post(
+            let videoURL = videos[Int.random(in: 0..<videos.count)]
+            return Post(
                 id: UUID(),
                 authorID: UUID(),
-                mediaURL: SampleMedia.photo(seed: "maduro-post-\(i)"),
-                mediaKind: .photo,
+                mediaURL: videoURL,
+                mediaKind: .video,
                 caption: captions[i % captions.count],
                 cigarID: CigarCatalog.all.randomElement()?.id,
                 storeID: nil,

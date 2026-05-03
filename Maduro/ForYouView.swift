@@ -24,6 +24,37 @@ struct ForYouView: View {
                 feed.items = buildInitialFeed()
                 feed.scrolledID = feed.items.first?.id
             }
+            prefetchAhead(from: feed.scrolledID)
+        }
+        .onChange(of: feed.scrolledID) { _, newID in
+            prefetchAhead(from: newID)
+        }
+    }
+
+    private func prefetchAhead(from id: String?) {
+        guard let id, let idx = feed.items.firstIndex(where: { $0.id == id }) else { return }
+        var photosQueued = 0
+        var videosQueued = 0
+        let maxPhotos = 5
+        let maxVideos = 2
+        for item in feed.items.dropFirst(idx + 1) {
+            let url: URL
+            let kind: Post.MediaKind
+            switch item {
+            case .post(let p): url = p.mediaURL; kind = p.mediaKind
+            case .ad(let a): url = a.mediaURL; kind = a.mediaKind
+            }
+            switch kind {
+            case .photo where photosQueued < maxPhotos:
+                MediaPrefetcher.shared.prefetchPhoto(url)
+                photosQueued += 1
+            case .video where videosQueued < maxVideos:
+                MediaPrefetcher.shared.prefetchVideo(url)
+                videosQueued += 1
+            default:
+                break
+            }
+            if photosQueued >= maxPhotos && videosQueued >= maxVideos { break }
         }
     }
 
@@ -36,8 +67,8 @@ struct ForYouView: View {
     }
 
     private func buildInitialFeed() -> [FeedItem] {
-        let posts = SamplePosts.make(count: 30)
-        let ads = SampleAds.make(count: 6)
+        let posts = SamplePosts.make(count: 50)
+        let ads = SampleAds.make(count: 8)
         return AdSlotPlanner.interleave(posts: posts, ads: ads, isSubscribed: session.isSubscribed)
     }
 }
