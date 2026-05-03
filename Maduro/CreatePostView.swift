@@ -1,5 +1,7 @@
 import SwiftUI
 import PhotosUI
+import AVFoundation
+import Supabase
 
 struct CreatePostView: View {
     @Environment(\.dismiss) private var dismiss
@@ -8,36 +10,55 @@ struct CreatePostView: View {
 
     @State private var pickedItem: PhotosPickerItem?
     @State private var pickedData: Data?
+    @State private var pickedKind: Post.MediaKind?
+    @State private var pickedFileExtension: String = "jpg"
+    @State private var pickedContentType: String = "image/jpeg"
     @State private var caption: String = ""
     @State private var selectedCigar: Cigar?
     @State private var selectedStore: CigarStore?
     @State private var showingCigarPicker = false
     @State private var showingStorePicker = false
+    @State private var mediaError: String?
+    @State private var isUploading = false
+    @State private var uploadError: String?
+
+    private static let maxVideoSeconds: Double = 60
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("Media") {
                     PhotosPicker(selection: $pickedItem, matching: .any(of: [.images, .videos])) {
-                        if pickedData != nil {
-                            Label("Media selected", systemImage: "checkmark.circle.fill")
+                        if pickedData != nil, let kind = pickedKind {
+                            Label(kind == .video ? "Video selected" : "Photo selected",
+                                  systemImage: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
                         } else {
-                            Label("Choose photo or video", systemImage: "photo.on.rectangle.angled")
+                            Label("Choose photo or video (videos < 60s)",
+                                  systemImage: "photo.on.rectangle.angled")
                         }
                     }
                     .onChange(of: pickedItem) { _, newItem in
-                        Task {
-                            if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                                pickedData = data
-                            }
-                        }
+                        Task { await loadPicked(newItem) }
+                    }
+                    if let mediaError {
+                        Text(mediaError)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
                     }
                 }
 
                 Section("Caption") {
                     TextField("Say something about this smoke…", text: $caption, axis: .vertical)
                         .lineLimit(3...6)
+                }
+
+                if let uploadError {
+                    Section {
+                        Text(uploadError)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
                 }
 
                 Section("Tag your cigar") {
@@ -101,8 +122,12 @@ struct CreatePostView: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Post") { post() }
-                        .disabled(pickedData == nil)
+                    if isUploading {
+                        ProgressView()
+                    } else {
+                        Button("Post") { Task { await post() } }
+                            .disabled(pickedData == nil || pickedKind == nil)
+                    }
                 }
             }
             .sheet(isPresented: $showingCigarPicker) {
@@ -120,10 +145,107 @@ struct CreatePostView: View {
         }
     }
 
-    private func post() {
-        // TODO: upload media to Supabase Storage, insert Post row, attach cigarID + storeID.
-        dismiss()
+    private func loadPicked(_ item: PhotosPickerItem?) async {
+        mediaError = nil
+        pickedData = nil
+        pickedKind = nil
+        guard let item else { return }
+
+        let supportedTypes = item.supportedContentTypes
+        let isVideo = supportedTypes.contains(where: { $0.conforms(to: .movie) || $0.conforms(to: .video) })
+
+        guard let data = try? await item.loadTransferable(type: Data.self) else {
+            mediaError = "Couldn't read that file. Try another."
+            return
+        }
+
+        if isVideo {
+            let tempURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("maduro-pick-\(UUID().uuidString).mov")
+            do {
+                try data.write(to: tempURL)
+            } catch {
+                mediaError = "Couldn't read that video. Try another."
+                return
+            }
+            defer { try? FileManager.default.removeItem(at: tempURL) }
+
+            let asset = AVURLAsset(url: tempURL)
+            let durationSeconds: Double
+            do {
+                let duration = try await asset.load(.duration)
+                durationSeconds = CMTimeGetSeconds(duration)
+            } catch {
+                mediaError = "Couldn't read that video's duration. Try another."
+                return
+            }
+            guard durationSeconds.isFinite, durationSeconds > 0 else {
+                mediaError = "That video looks empty. Try another."
+                return
+            }
+            if durationSeconds > Self.maxVideoSeconds {
+                let secs = Int(durationSeconds.rounded())
+                mediaError = "Videos must be under 60s — that one is \(secs)s. Trim it and try again."
+                return
+            }
+
+            pickedData = data
+            pickedKind = .video
+            pickedFileExtension = "mov"
+            pickedContentType = "video/quicktime"
+        } else {
+            pickedData = data
+            pickedKind = .photo
+            pickedFileExtension = "jpg"
+            pickedContentType = "image/jpeg"
+        }
     }
+
+    private func post() async {
+        guard let data = pickedData,
+              let kind = pickedKind,
+              let user = session.currentUser else { return }
+        isUploading = true
+        uploadError = nil
+        defer { isUploading = false }
+
+        let postID = UUID()
+        let path = "\(user.id.uuidString.lowercased())/\(postID.uuidString.lowercased()).\(pickedFileExtension)"
+        let bucket = supabase.storage.from("posts")
+
+        do {
+            _ = try await bucket.upload(
+                path,
+                data: data,
+                options: FileOptions(contentType: pickedContentType, upsert: false)
+            )
+            let publicURL = try bucket.getPublicURL(path: path)
+
+            let row = NewPostRow(
+                id: postID,
+                author_id: user.id,
+                media_url: publicURL.absoluteString,
+                media_kind: kind == .video ? "video" : "photo",
+                caption: caption,
+                cigar_id: selectedCigar?.id,
+                store_id: selectedStore?.id
+            )
+            try await supabase.from("posts").insert(row).execute()
+            dismiss()
+        } catch {
+            uploadError = "Upload failed: \(error.localizedDescription)"
+        }
+    }
+}
+
+private struct NewPostRow: Encodable {
+    let id: UUID
+    let author_id: UUID
+    let media_url: String
+    let media_kind: String
+    let caption: String
+    let cigar_id: UUID?
+    let store_id: UUID?
 }
 
 struct CigarPickerView: View {
