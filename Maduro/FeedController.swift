@@ -13,6 +13,28 @@ final class FeedController: ObservableObject {
     @Published var items: [FeedItem] = []
     @Published var scrolledID: String?
     @Published var reactedIDs: Set<String> = []
+    @Published var isLoadingInitial = false
+    private var hasLoaded = false
+
+    func loadInitialIfNeeded(isSubscribed: Bool) async {
+        guard !hasLoaded else { return }
+        hasLoaded = true
+        isLoadingInitial = true
+        defer { isLoadingInitial = false }
+
+        let real: [Post]
+        do {
+            real = try await PostsRepository.fetchRecent()
+        } catch {
+            real = []
+        }
+
+        let fillerCount = max(0, 50 - real.count)
+        let posts = real + SamplePosts.make(count: fillerCount)
+        let ads = SampleAds.make(count: 8)
+        items = AdSlotPlanner.interleave(posts: posts, ads: ads, isSubscribed: isSubscribed)
+        scrolledID = items.first?.id
+    }
 
     var currentItem: FeedItem? {
         guard let id = scrolledID else { return items.first }

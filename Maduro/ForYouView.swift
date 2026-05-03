@@ -19,11 +19,13 @@ struct ForYouView: View {
         .scrollPosition(id: $feed.scrolledID)
         .ignoresSafeArea()
         .background(.black)
-        .task {
-            if feed.items.isEmpty {
-                feed.items = buildInitialFeed()
-                feed.scrolledID = feed.items.first?.id
+        .overlay {
+            if feed.isLoadingInitial && feed.items.isEmpty {
+                ProgressView().tint(.white)
             }
+        }
+        .task {
+            await feed.loadInitialIfNeeded(isSubscribed: session.isSubscribed)
             prefetchAhead(from: feed.scrolledID)
         }
         .onChange(of: feed.scrolledID) { _, newID in
@@ -66,11 +68,6 @@ struct ForYouView: View {
         }
     }
 
-    private func buildInitialFeed() -> [FeedItem] {
-        let posts = SamplePosts.make(count: 50)
-        let ads = SampleAds.make(count: 8)
-        return AdSlotPlanner.interleave(posts: posts, ads: ads, isSubscribed: session.isSubscribed)
-    }
 }
 
 // MARK: - Cells
