@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// Root in-app shell. Replaces the system TabView with TIDE-style
-/// chrome: a small profile circle in the top-right and a single
-/// floating pill bar at the bottom with four buttons that act on
-/// whichever post is currently snapped in the For You feed.
+/// Root in-app shell. Live-broadcast-styled chrome over the For You
+/// feed: a translucent top bar (back / author pill / overflow menu),
+/// a viewer-count pill, and a bottom message composer. Post, Search
+/// and Profile moved into the overflow menu so the composer can match
+/// the mockup's heart + emoji + message-field layout.
 struct MainTabView: View {
     @EnvironmentObject var session: SessionStore
     @StateObject private var feed = FeedController()
@@ -19,13 +20,22 @@ struct MainTabView: View {
                 .environmentObject(feed)
                 .ignoresSafeArea()
 
+            // Top scrim keeps the chrome legible over bright media.
             VStack {
-                HStack {
-                    Spacer()
-                    Button { showingProfile = true } label: {
-                        ProfileCircle(user: session.currentUser)
-                    }
-                    .padding(.trailing, 18)
+                LinearGradient(
+                    colors: [.black.opacity(0.45), .clear],
+                    startPoint: .top, endPoint: .bottom
+                )
+                .frame(height: 170)
+                Spacer()
+            }
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
+
+            VStack(spacing: 10) {
+                topBar
+                if let post = feed.currentPost {
+                    viewerPill(count: post.cigarReactionCount)
                 }
                 Spacer()
             }
@@ -33,15 +43,9 @@ struct MainTabView: View {
 
             VStack {
                 Spacer()
-                FloatingTabBar(
-                    isReacted: feed.currentIsReacted,
-                    onCigar: { feed.toggleReactionOnCurrent() },
-                    onComments: { showingComments = true },
-                    onPost: { showingCreate = true },
-                    onSearch: { showingSearch = true }
-                )
-                .padding(.horizontal, 22)
-                .padding(.bottom, 14)
+                composerBar
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 14)
             }
         }
         .fullScreenCover(isPresented: $showingCreate) {
@@ -70,6 +74,92 @@ struct MainTabView: View {
         }
     }
 
+    // MARK: - Top bar
+
+    private var topBar: some View {
+        HStack(spacing: 0) {
+            Button { scrollToTop() } label: {
+                CircleIcon(systemName: "chevron.left", size: 46)
+            }
+            Spacer()
+            Button { showingProfile = true } label: {
+                AuthorPill(handle: authorHandle)
+            }
+            Spacer()
+            Menu {
+                Button { showingCreate = true } label: {
+                    Label("New Post", systemImage: "plus.square")
+                }
+                Button { showingSearch = true } label: {
+                    Label("Search", systemImage: "magnifyingglass")
+                }
+                Button { showingProfile = true } label: {
+                    Label("Profile", systemImage: "person.crop.circle")
+                }
+            } label: {
+                CircleIcon(systemName: "ellipsis", size: 46)
+            }
+        }
+        .padding(.horizontal, 18)
+    }
+
+    private func viewerPill(count: Int) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: "eye.fill").font(.caption2)
+            Text("\(count)").font(.caption).bold()
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(.ultraThinMaterial, in: .capsule)
+        .overlay(Capsule().stroke(.white.opacity(0.15), lineWidth: 1))
+    }
+
+    // MARK: - Bottom composer
+
+    private var composerBar: some View {
+        HStack(spacing: 10) {
+            Button { feed.toggleReactionOnCurrent() } label: {
+                CircleIcon(
+                    systemName: feed.currentIsReacted ? "heart.fill" : "heart",
+                    size: 50,
+                    tint: feed.currentIsReacted ? .red : .white
+                )
+            }
+            Button { showingComments = true } label: {
+                CircleIcon(systemName: "face.smiling", size: 50)
+            }
+            Button { showingComments = true } label: {
+                HStack {
+                    Text("Type a message…")
+                        .foregroundStyle(.white.opacity(0.85))
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .frame(height: 50)
+                .background(.ultraThinMaterial, in: .capsule)
+                .overlay(Capsule().stroke(.white.opacity(0.15), lineWidth: 1))
+            }
+        }
+    }
+
+    // MARK: - Helpers
+
+    private var authorHandle: String {
+        if let post = feed.currentPost {
+            return "@cigar_fan_\(post.authorID.uuidString.prefix(4).lowercased())"
+        }
+        if let ad = feed.currentAd {
+            return ad.businessName
+        }
+        return "@maduro"
+    }
+
+    private func scrollToTop() {
+        guard let first = feed.items.first?.id else { return }
+        withAnimation(.easeInOut) { feed.scrolledID = first }
+    }
+
     @ViewBuilder
     private var commentsSheet: some View {
         if let post = feed.currentPost {
@@ -82,115 +172,42 @@ struct MainTabView: View {
     }
 }
 
-// MARK: - Top-right profile circle
+// MARK: - Reusable chrome
 
-private struct ProfileCircle: View {
-    let user: AppUser?
+/// Translucent circular icon — the back / overflow / heart / emoji
+/// buttons in the live-broadcast layout.
+private struct CircleIcon: View {
+    let systemName: String
+    var size: CGFloat = 48
+    var tint: Color = .white
 
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(
-                    AngularGradient(
-                        colors: [.orange, .yellow, .pink, .purple, .blue, .green, .orange],
-                        center: .center
-                    )
-                )
-                .frame(width: 44, height: 44)
-                .blur(radius: 1.5)
-
-            Circle()
-                .fill(.brown.gradient)
-                .frame(width: 36, height: 36)
-                .overlay(
-                    Text(initials)
-                        .font(.caption.bold())
-                        .foregroundStyle(.white)
-                )
-        }
-        .shadow(color: .black.opacity(0.4), radius: 6, y: 2)
-    }
-
-    private var initials: String {
-        guard let user else { return "S" }
-        let parts = user.displayName.split(separator: " ").prefix(2)
-        let value = parts.compactMap { $0.first.map(String.init) }.joined().uppercased()
-        return value.isEmpty ? "S" : value
+        Image(systemName: systemName)
+            .font(.system(size: size * 0.4, weight: .semibold))
+            .foregroundStyle(tint)
+            .frame(width: size, height: size)
+            .background(.ultraThinMaterial, in: Circle())
+            .overlay(Circle().stroke(.white.opacity(0.15), lineWidth: 1))
+            .shadow(color: .black.opacity(0.3), radius: 6, y: 2)
     }
 }
 
-// MARK: - Floating bottom pill
-
-private struct FloatingTabBar: View {
-    let isReacted: Bool
-    let onCigar: () -> Void
-    let onComments: () -> Void
-    let onPost: () -> Void
-    let onSearch: () -> Void
+/// White "Host"-style pill showing the current post's author.
+private struct AuthorPill: View {
+    let handle: String
 
     var body: some View {
-        HStack(spacing: 0) {
-            tabButton(action: onCigar) {
-                CigarTabIcon(isOn: isReacted)
-            }
-            tabButton(action: onComments) {
-                Image(systemName: "bubble.left.and.bubble.right.fill")
-                    .font(.system(size: 20))
-                    .foregroundStyle(.white)
-            }
-            tabButton(action: onPost) {
-                Image(systemName: "plus.square.fill")
-                    .font(.system(size: 22))
-                    .foregroundStyle(.white)
-            }
-            tabButton(action: onSearch) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(.white)
-            }
+        HStack(spacing: 7) {
+            SeededAvatar(seed: handle, size: 30)
+            Text(handle)
+                .font(.caption).bold()
+                .foregroundStyle(.black)
+                .lineLimit(1)
         }
-        .padding(.horizontal, 6)
-        .padding(.vertical, 10)
-        .background(.ultraThinMaterial, in: .capsule)
-        .overlay(
-            Capsule().stroke(.white.opacity(0.18), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(0.4), radius: 12, y: 6)
-    }
-
-    @ViewBuilder
-    private func tabButton<Content: View>(
-        action: @escaping () -> Void,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        Button(action: action) {
-            content()
-                .frame(maxWidth: .infinity)
-                .frame(height: 36)
-                .contentShape(Rectangle())
-        }
-    }
-}
-
-private struct CigarTabIcon: View {
-    let isOn: Bool
-
-    var body: some View {
-        ZStack {
-            // Cigar body — stays white so it always reads against the dark feed.
-            Capsule()
-                .fill(.white)
-                .frame(width: 30, height: 11)
-
-            // Tip: dormant ash when unlit, glowing red ember when lit.
-            Circle()
-                .fill(isOn ? Color.red : Color.gray.opacity(0.85))
-                .frame(width: 10, height: 10)
-                .offset(x: -15)
-                .shadow(color: isOn ? .red : .clear, radius: 4)
-                .shadow(color: isOn ? .orange.opacity(0.85) : .clear, radius: 10)
-                .shadow(color: isOn ? .red.opacity(0.6) : .clear, radius: 16)
-        }
-        .animation(.easeInOut(duration: 0.25), value: isOn)
+        .padding(.leading, 5)
+        .padding(.trailing, 12)
+        .padding(.vertical, 5)
+        .background(.white, in: .capsule)
+        .shadow(color: .black.opacity(0.25), radius: 6, y: 2)
     }
 }

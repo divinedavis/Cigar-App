@@ -28,9 +28,9 @@ Cigar-App/
 ├── Maduro.xcodeproj/          # generated; committed so CI + ship.sh work without xcodegen install
 ├── Maduro/
 │   ├── MaduroApp.swift        # @main entry
-│   ├── MainTabView.swift      # 3-tab shell (For You / Post / Profile)
+│   ├── MainTabView.swift      # live-broadcast chrome over the feed: top bar, viewer pill, message composer (Post/Search/Profile in overflow menu)
 │   ├── AuthView.swift         # sign in / sign up with 21+ DOB gate
-│   ├── ForYouView.swift       # vertical swipeable feed, cigar reactions
+│   ├── ForYouView.swift       # vertical swipeable feed, live-broadcast-style chat overlay
 │   ├── CreatePostView.swift   # media picker + cigar tag + store tag
 │   ├── ProfileView.swift
 │   ├── CigarReactionButton.swift  # cigar-shaped like button
@@ -57,7 +57,7 @@ Cigar-App/
 
 ## Design rules
 
-- **Reactions:** cigar icon, never a heart. See `CigarReactionButton.swift`.
+- **Reactions:** heart icon in the For You feed composer (`MainTabView` composer bar). The live-broadcast feed restyle (2026-05) switched from the cigar glyph to a heart at the user's request; the legacy `CigarReactionButton.swift` is now unused.
 - **Location:** Apple Maps only (no Google Places). `MKLocalSearch` with keyword queries since there's no `tobacco_shop` POI category. Radius 400m. Deduplicate by coordinate.
 - **Ads:** serve only from the user's own ad portal. No AdMob / Meta. Placement: random gap ∈ [4,10] posts, min gap 4. Subscribed users see no ads.
 - **Age gate:** DOB picker at signup, computed age must be ≥ 21. Do not ship a "tick to confirm 21+" checkbox alone.
