@@ -17,6 +17,9 @@ struct ForYouView: View {
         }
         .scrollTargetBehavior(.paging)
         .scrollPosition(id: $feed.scrolledID)
+        .refreshable {
+            await feed.refresh(isSubscribed: session.isSubscribed)
+        }
         .ignoresSafeArea()
         .background(.black)
         .overlay {

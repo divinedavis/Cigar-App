@@ -77,27 +77,25 @@ struct MainTabView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        HStack(spacing: 0) {
-            Button { scrollToTop() } label: {
-                CircleIcon(systemName: "chevron.left", size: 46)
+        ZStack {
+            HStack {
+                Spacer()
+                Menu {
+                    Button { showingCreate = true } label: {
+                        Label("New Post", systemImage: "plus.square")
+                    }
+                    Button { showingSearch = true } label: {
+                        Label("Search", systemImage: "magnifyingglass")
+                    }
+                    Button { showingProfile = true } label: {
+                        Label("Profile", systemImage: "person.crop.circle")
+                    }
+                } label: {
+                    CircleIcon(systemName: "ellipsis", size: 46)
+                }
             }
-            Spacer()
             Button { showingProfile = true } label: {
                 AuthorPill(handle: authorHandle)
-            }
-            Spacer()
-            Menu {
-                Button { showingCreate = true } label: {
-                    Label("New Post", systemImage: "plus.square")
-                }
-                Button { showingSearch = true } label: {
-                    Label("Search", systemImage: "magnifyingglass")
-                }
-                Button { showingProfile = true } label: {
-                    Label("Profile", systemImage: "person.crop.circle")
-                }
-            } label: {
-                CircleIcon(systemName: "ellipsis", size: 46)
             }
         }
         .padding(.horizontal, 18)
@@ -153,11 +151,6 @@ struct MainTabView: View {
             return ad.businessName
         }
         return "@maduro"
-    }
-
-    private func scrollToTop() {
-        guard let first = feed.items.first?.id else { return }
-        withAnimation(.easeInOut) { feed.scrolledID = first }
     }
 
     @ViewBuilder

@@ -21,7 +21,16 @@ final class FeedController: ObservableObject {
         hasLoaded = true
         isLoadingInitial = true
         defer { isLoadingInitial = false }
+        await buildFeed(isSubscribed: isSubscribed)
+    }
 
+    /// Pull-to-refresh: re-fetch and rebuild the feed from scratch,
+    /// snapping back to the top post.
+    func refresh(isSubscribed: Bool) async {
+        await buildFeed(isSubscribed: isSubscribed)
+    }
+
+    private func buildFeed(isSubscribed: Bool) async {
         let real: [Post]
         do {
             real = try await PostsRepository.fetchRecent()
@@ -33,6 +42,7 @@ final class FeedController: ObservableObject {
         let posts = real + SamplePosts.make(count: fillerCount)
         let ads = SampleAds.make(count: 8)
         items = AdSlotPlanner.interleave(posts: posts, ads: ads, isSubscribed: isSubscribed)
+        reactedIDs.removeAll()
         scrolledID = items.first?.id
     }
 
