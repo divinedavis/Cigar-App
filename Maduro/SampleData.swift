@@ -52,8 +52,9 @@ enum SamplePosts {
                 storeID: nil,
                 createdAt: Date().addingTimeInterval(-Double(i) * 3600),
                 cigarReactionCount: Int.random(in: 12...2400),
-                commentCount: Int.random(in: 0...180),
+                commentCount: Int.random(in: 100...200),
                 saveCount: Int.random(in: 0...400),
+                viewCount: Int.random(in: 10_000...300_000),
                 viewerHasReacted: false
             )
         }

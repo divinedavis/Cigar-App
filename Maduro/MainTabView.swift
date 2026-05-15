@@ -35,7 +35,7 @@ struct MainTabView: View {
             VStack(spacing: 10) {
                 topBar
                 if let post = feed.currentPost {
-                    viewerPill(count: post.cigarReactionCount)
+                    viewerPill(count: post.viewCount)
                 }
                 Spacer()
             }
@@ -104,13 +104,22 @@ struct MainTabView: View {
     private func viewerPill(count: Int) -> some View {
         HStack(spacing: 5) {
             Image(systemName: "eye.fill").font(.caption2)
-            Text("\(count)").font(.caption).bold()
+            Text(abbreviatedCount(count)).font(.caption).bold()
         }
         .foregroundStyle(.white)
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(.ultraThinMaterial, in: .capsule)
         .overlay(Capsule().stroke(.white.opacity(0.15), lineWidth: 1))
+    }
+
+    /// 11_692 -> "11.7K", 299_783 -> "299.8K".
+    private func abbreviatedCount(_ count: Int) -> String {
+        if count >= 1000 {
+            let thousands = Double(count) / 1000
+            return String(format: "%.1fK", thousands)
+        }
+        return "\(count)"
     }
 
     // MARK: - Bottom composer

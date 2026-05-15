@@ -25,6 +25,7 @@ struct Post: Identifiable, Codable, Equatable {
     var cigarReactionCount: Int
     var commentCount: Int
     var saveCount: Int
+    var viewCount: Int
     var viewerHasReacted: Bool
 
     enum MediaKind: String, Codable { case photo, video }

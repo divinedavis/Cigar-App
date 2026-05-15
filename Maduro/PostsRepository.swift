@@ -29,6 +29,7 @@ private struct PostRow: Decodable {
     let cigar_reaction_count: Int
     let comment_count: Int
     let save_count: Int
+    let view_count: Int
 
     var asPost: Post? {
         guard let mediaURL = URL(string: media_url),
@@ -45,6 +46,7 @@ private struct PostRow: Decodable {
             cigarReactionCount: cigar_reaction_count,
             commentCount: comment_count,
             saveCount: save_count,
+            viewCount: view_count,
             viewerHasReacted: false
         )
     }

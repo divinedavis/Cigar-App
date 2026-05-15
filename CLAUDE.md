@@ -46,6 +46,9 @@ Cigar-App/
 │   ├── Info.plist
 │   ├── Maduro.entitlements
 │   └── Assets.xcassets/
+├── migrations/                # SQL migrations applied to the Supabase DB
+│   ├── 001_explicit_grants.sql
+│   └── 002_daily_feed_seed.sql # view_count/is_seed columns + daily pg_cron seeding
 ├── scripts/
 │   ├── ship.sh                # archive + upload to TestFlight
 │   └── asc-config.env.example # copy to asc-config.env (gitignored) with ASC creds
@@ -63,6 +66,16 @@ Cigar-App/
 - **Age gate:** DOB picker at signup, computed age must be ≥ 21. Do not ship a "tick to confirm 21+" checkbox alone.
 - **App Store positioning:** community/review app. Do not add in-app tobacco purchase flows — Apple rejects tobacco-sales apps.
 - **Bundle ID:** `com.divinedavis.stogie`. Team: `CG89RY4W6R`.
+
+## Feed seeding
+
+The Supabase `posts` table is repopulated daily by a `pg_cron` job
+(`maduro-daily-feed-seed`, 08:00 UTC) calling `public.seed_daily_feed()`.
+Each run deletes the prior demo posts (`is_seed = true`) and inserts
+100 video + 100 photo posts with `comment_count` 100–200 and
+`view_count` 10k–300k. Real user posts (`is_seed = false`) are never
+touched. See `migrations/002_daily_feed_seed.sql`. The eye pill in the
+feed shows `view_count`.
 
 ## Out of v1 scope
 
