@@ -127,21 +127,24 @@ struct MainTabView: View {
             Button { showingComments = true } label: {
                 CircleIcon(systemName: "face.smiling", size: 50)
             }
-            Button { showingComments = true } label: {
-                HStack {
-                    Text("Type a message…")
-                        .foregroundStyle(.white.opacity(0.85))
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .frame(height: 50)
-                .background(.ultraThinMaterial, in: .capsule)
-                .overlay(Capsule().stroke(.white.opacity(0.15), lineWidth: 1))
+            ShareLink(item: shareContent) {
+                CircleIcon(systemName: "square.and.arrow.up", size: 50)
             }
+            Spacer()
         }
     }
 
     // MARK: - Helpers
+
+    private var shareContent: String {
+        if let post = feed.currentPost {
+            return "Check out this cigar moment on Maduro: \(post.caption)"
+        }
+        if let ad = feed.currentAd {
+            return "\(ad.businessName) on Maduro: \(ad.headline)"
+        }
+        return "Check out Maduro — a community for cigar lovers."
+    }
 
     private var authorHandle: String {
         if let post = feed.currentPost {
