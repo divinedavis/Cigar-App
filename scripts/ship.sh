@@ -21,8 +21,8 @@ source scripts/asc-config.env
 PROJECT="Maduro.xcodeproj"
 SCHEME="Maduro"
 PBXPROJ="$PROJECT/project.pbxproj"
-ARCHIVE="build/Maduro.xcarchive"
-EXPORT_DIR="build/export"
+ARCHIVE="build.nosync/Maduro.xcarchive"
+EXPORT_DIR="build.nosync/export"
 IPA="$EXPORT_DIR/Maduro.ipa"
 
 # 0. Bump CURRENT_PROJECT_VERSION in project.yml (source of truth) so
@@ -44,8 +44,8 @@ fi
 
 # 2. Archive.
 echo "==> archiving"
-rm -rf build
-mkdir -p build
+rm -rf build.nosync
+mkdir -p build.nosync
 xcodebuild \
     -project "$PROJECT" \
     -scheme "$SCHEME" \

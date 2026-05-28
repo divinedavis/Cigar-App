@@ -85,3 +85,7 @@ APIKeys.swift
 # Scraper artifacts (local only)
 scripts/cigars_data/
 scripts/scraper.env
+
+# iCloud-excluded build output (kept off iCloud sync; regenerable)
+build.nosync/
+*.nosync
